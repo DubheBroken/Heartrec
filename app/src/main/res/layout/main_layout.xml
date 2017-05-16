@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:fitsSystemWindows="true"
+    android:clipToPadding="false">
+
+    <SearchView
+        android:layout_weight="0"
+        android:id="@+id/searchview1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+    </SearchView>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1px"
+        android:background="@color/gray"
+        />
+
+     <ListView
+         android:id="@+id/itemlist"
+         android:layout_marginLeft="8dp"
+         android:layout_marginRight="8dp"
+         android:layout_weight="1"
+         android:layout_width="match_parent"
+         android:layout_height="match_parent"
+         android:scrollbars="none"
+         >
+
+     </ListView>
+
+    <android.support.design.widget.FloatingActionButton
+        android:layout_marginTop="-78dp"
+        android:id="@+id/btn_newone"
+        android:layout_height="56dp"
+        android:layout_width="56dp"
+        android:src="@drawable/btn_new_one"
+        android:layout_gravity="right"
+        android:layout_marginRight="30dp"
+        android:layout_marginBottom="30dp"
+        app:elevation="4dp"
+        app:rippleColor="@color/colorAccent"
+        app:pressedTranslationZ="8dp"
+        app:borderWidth="0dp"
+        android:backgroundTint="@color/colorAccent"
+        />
+
+
+</LinearLayout>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rotate xmlns:android="http://schemas.android.com/apk/res/android"
+    android:fromDegrees="0"
+    android:toDegrees="90"
+    android:duration="200"
+    android:pivotX="50%"
+    android:pivotY="50%"
+    >
+    <!--//设置旋转中心点的X轴为中点（按百分比），若为数字和为像素点-->
+    <!--设置旋转中心点的Y轴为中点（按百分比），若为数字和为像素点 -->
+</rotate>

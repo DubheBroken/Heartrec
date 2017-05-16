@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#ffffff</color>
+    <color name="colorPrimaryDark">#ffffff</color>
+    <color name="colorAccent">#0ea8e3</color>
+    <color name="colorAccentDark">#0e5ce3</color>
+    <color name="gray">#c6c6c6</color>
+    <color name="meantext">#666666</color>
+    <color name="meanback">#f0f0f0</color>
+    <color name="line_gray">#c0c0c0</color>
+    <color name="white">#ffffff</color>
+    <color name="black">#000000</color>
+    <color name="text_black">#0d0c0c</color>
+    <color name="red">#E52446</color>
+    <color name="green">#60E55B</color>
+</resources>

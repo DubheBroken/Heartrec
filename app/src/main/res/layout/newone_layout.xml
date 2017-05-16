@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_margin="8dp"
+    android:id="@+id/layout_newone"
+    android:fitsSystemWindows="true"
+    android:clipToPadding="false">
+
+    <TextView
+        android:layout_weight="0"
+        android:id="@+id/text_time"
+        android:layout_marginTop="8dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/time"
+        android:textSize="12sp"
+        />
+
+    <EditText
+        android:layout_marginTop="8dp"
+        android:background="@null"
+        android:layout_weight="1"
+        android:lineSpacingMultiplier="1"
+        android:gravity="start"
+        android:textColor="@color/text_black"
+        android:id="@+id/edittext_substance"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:textSize="14sp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+
+        >
+
+        <android.support.design.widget.FloatingActionButton
+            android:layout_marginBottom="24dp"
+            android:id="@+id/btn_cancel"
+            android:layout_height="56dp"
+            android:layout_width="56dp"
+            android:layout_marginLeft="78dp"
+            android:src="@drawable/cancel"
+            android:layout_gravity="right"
+            android:layout_marginRight="24dp"
+            app:elevation="4dp"
+            app:rippleColor="@color/red"
+            app:pressedTranslationZ="8dp"
+            app:borderWidth="0dp"
+            android:backgroundTint="@color/red"
+            android:layout_weight="1"
+            android:scaleType="center"
+            />
+
+        <android.support.design.widget.FloatingActionButton
+            android:layout_weight="1"
+            android:id="@+id/btn_save"
+            android:layout_height="56dp"
+            android:layout_width="56dp"
+            android:src="@drawable/save"
+            android:layout_gravity="right"
+            android:scaleType="center"
+            android:layout_marginLeft="56dp"
+            app:elevation="4dp"
+            app:rippleColor="@color/green"
+            app:pressedTranslationZ="8dp"
+            app:borderWidth="0dp"
+            android:backgroundTint="@color/green"
+            />
+    </LinearLayout>
+</LinearLayout>
