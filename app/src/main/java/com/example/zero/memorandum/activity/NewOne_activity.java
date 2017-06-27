@@ -1,4 +1,4 @@
-package com.example.zero.memorandum;
+package com.example.zero.memorandum.activity;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -25,6 +25,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.example.zero.memorandum.R;
 import com.example.zero.memorandum.utils.Constant;
 import com.example.zero.memorandum.utils.DbManager;
 import com.example.zero.memorandum.utils.Memorandum_JavaBean;
@@ -38,22 +39,21 @@ import java.util.Date;
  * Created by Zero on 2017/2/16.
  */
 
-public class NewOne_activity extends Activity implements OnClickListener{
+public class NewOne_activity extends Activity implements OnClickListener {
 
-    private Context context=this;
+    private Context context = this;
 
     private Intent intent;
-    private String id="";
+    private String id = "";
 
     private SqliteHelper sqliteHelper;
-//    注册控件
+    //    注册控件
     private EditText editText_substance;
-    private TextView textView_time;
-    private FloatingActionButton btn_save,btn_cancel;
+    private TextView textView_time, btn_save, btn_cancel, btn_topaint;
     private LinearLayout layout;
 
-//    数据变量
-    private String nowtime,substance;
+    //    数据变量
+    private String nowtime, substance;
 
 //    自动保存计时器
 //    final Handler handler = new Handler();
@@ -100,7 +100,6 @@ public class NewOne_activity extends Activity implements OnClickListener{
 
         // 状态栏背景色
         tintManager.setTintColor(getColor(R.color.colorAccent));
-
 
 
 //        自动保存
@@ -150,19 +149,21 @@ public class NewOne_activity extends Activity implements OnClickListener{
         win.setAttributes(winParams);
     }
 
-    private void initView(){
+    private void initView() {
         sqliteHelper = DbManager.getIntance(this);
 //        option_helper = new OptionHelper(context);
         //        实例化控件
         editText_substance = (EditText) findViewById(R.id.edittext_substance);
-        btn_save = (FloatingActionButton) findViewById(R.id.btn_save);
-        btn_cancel = (FloatingActionButton) findViewById(R.id.btn_cancel);
+        btn_save = (TextView) findViewById(R.id.btn_save);
+        btn_cancel = (TextView) findViewById(R.id.btn_cancel);
         textView_time = (TextView) findViewById(R.id.text_time);
         layout = (LinearLayout) findViewById(R.id.layout_newone);
+        btn_topaint = (TextView) findViewById(R.id.btn_topaint);
 
 //        点击监听
         btn_save.setOnClickListener(this);
         btn_cancel.setOnClickListener(this);
+        btn_topaint.setOnClickListener(this);
 
         editText_substance.addTextChangedListener(textWatcher);
         textView_time.setText(nowtime);
@@ -172,14 +173,12 @@ public class NewOne_activity extends Activity implements OnClickListener{
     }
 
 
-
-
 //    点击事件
 
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()){
+        switch (v.getId()) {
             case R.id.btn_cancel:
                 cancel();
                 break;
@@ -187,13 +186,17 @@ public class NewOne_activity extends Activity implements OnClickListener{
                 save();
                 finish();
                 break;
+            case R.id.btn_topaint:
+                intent = new Intent(this,Painter_activity.class);
+                startActivity(intent);
+                break;
         }
     }
 
 //    取消
 
     public void cancel() {
-        if(!"".equals(id)) {//id不为空，界面从已存在的条目创建
+        if (!"".equals(id)) {//id不为空，界面从已存在的条目创建
             //查询是否更改过内容
             SQLiteDatabase db = sqliteHelper.getWritableDatabase();
             Log.i("execSQL", "db实例化完成");
@@ -213,16 +216,15 @@ public class NewOne_activity extends Activity implements OnClickListener{
                 Log.i("execSQL", "数据库已关闭");
                 if (memorandum_javaBean.substance.equals(substance)) {//没有改变内容
                     finish();//直接关闭
-                }
-                else{
+                } else {
                     showDialog();//询问是否保存
                 }
             }
-        }else{
+        } else {
             //界面为新建界面
-            if(substance==null||"".equals(substance)) {//内容为空，用户没有输入
+            if (substance == null || "".equals(substance)) {//内容为空，用户没有输入
                 finish();
-            }else {
+            } else {
                 showDialog();
             }
         }
@@ -263,8 +265,8 @@ public class NewOne_activity extends Activity implements OnClickListener{
         dialog.getWindow().setAttributes(params);
     }
 
-//    删除记录
-    public void delete(int id){
+    //    删除记录
+    public void delete(int id) {
         SQLiteDatabase db = sqliteHelper.getWritableDatabase();//打开数据库
         try {
             String sql = "delete from " + Constant.TABLE_NAME + " where " + Constant.ID + "=\"" + id + "\";";
@@ -277,32 +279,31 @@ public class NewOne_activity extends Activity implements OnClickListener{
     }
 
     //    保存
-    public void save(){
-        Log.i("---click save---","点击保存按钮");
-        if(substance!=null&&!"".equals(substance)) {
+    public void save() {
+        Log.i("---click save---", "点击保存按钮");
+        if (substance != null && !"".equals(substance)) {
             SQLiteDatabase db = sqliteHelper.getWritableDatabase();//打开数据库
-                if(id!=null&&!id.equals("")) {
-                    try {
-                        String sql = "update " + Constant.TABLE_NAME + " set "  + "" + Constant.SUBSTANCE + "=\""+substance+"\"," + Constant.TIME + "=\"" + nowtime + "\" where " + Constant.ID + "=" + id + ";";
-                        Log.i("strsql", sql);
-                        DbManager.execSQL(db, sql);
-                        Log.i("---execSQL---", "更新数据成功");
-                    } catch (Exception e) {
-                        Log.e("---execSQL---", "更新数据失败");
-                    }
+            if (id != null && !id.equals("")) {
+                try {
+                    String sql = "update " + Constant.TABLE_NAME + " set " + "" + Constant.SUBSTANCE + "=\"" + substance + "\"," + Constant.TIME + "=\"" + nowtime + "\" where " + Constant.ID + "=" + id + ";";
+                    Log.i("strsql", sql);
+                    DbManager.execSQL(db, sql);
+                    Log.i("---execSQL---", "更新数据成功");
+                } catch (Exception e) {
+                    Log.e("---execSQL---", "更新数据失败");
                 }
-            else {
-                    try {
-                        String sql = "insert into " + Constant.TABLE_NAME + " values(null,'" + substance + "','" + nowtime +"');";
-                        Log.i("strsql", sql);
-                        DbManager.execSQL(db, sql);
-                        Log.i("---execSQL---", "插入数据成功");
-                    } catch (Exception e) {
-                        Log.e("---execSQL---", "插入数据失败");
-                    }
+            } else {
+                try {
+                    String sql = "insert into " + Constant.TABLE_NAME + " values(null,'" + substance + "','" + nowtime + "');";
+                    Log.i("strsql", sql);
+                    DbManager.execSQL(db, sql);
+                    Log.i("---execSQL---", "插入数据成功");
+                } catch (Exception e) {
+                    Log.e("---execSQL---", "插入数据失败");
                 }
+            }
             db.close();//关闭数据库
-            Log.i("---SQL---","数据库已关闭");
+            Log.i("---SQL---", "数据库已关闭");
         }
     }
 
@@ -311,41 +312,41 @@ public class NewOne_activity extends Activity implements OnClickListener{
         @Override
         public void onTextChanged(CharSequence s, int start, int before,
                                   int count) {
-        //文本内容变化时
+            //文本内容变化时
 
         }
 
         @Override
         public void beforeTextChanged(CharSequence s, int start, int count,
                                       int after) {
-        //文本内容变化前
+            //文本内容变化前
 
         }
 
         @Override
         public void afterTextChanged(Editable s) {
-        //文本内容变化后
-            substance=editText_substance.getText().toString();
+            //文本内容变化后
+            substance = editText_substance.getText().toString();
         }
     };
 
     /**
      * 查询并赋值控件
-     * */
+     */
     private void initData(String id) {
         //查询数据
         SQLiteDatabase db = sqliteHelper.getWritableDatabase();
-        String sql = "select * from "+ Constant.TABLE_NAME+" where "+Constant.ID+"="+id+";";
-        Cursor cursor = DbManager.selectDataBySql(db,sql,null);
-        if(cursor!=null) {
-            Log.i("cursor","cursor不为空");
+        String sql = "select * from " + Constant.TABLE_NAME + " where " + Constant.ID + "=" + id + ";";
+        Cursor cursor = DbManager.selectDataBySql(db, sql, null);
+        if (cursor != null) {
+            Log.i("cursor", "cursor不为空");
 //                为控件赋值
-            if(cursor.moveToFirst()) {
+            if (cursor.moveToFirst()) {
                 editText_substance.setText(cursor.getString(cursor.getColumnIndex("substance")));
             }
         }
         db.close();//关闭数据库
-        Log.i("execSQL","数据库已关闭");
+        Log.i("execSQL", "数据库已关闭");
     }
 
 //    【已弃用】自动保存

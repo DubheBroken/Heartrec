@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="paintcolor">
+        <item>红色</item>
+        <item>蓝色</item>
+        <item>绿色</item>
+        <item>黄色</item>
+        <item>黑色</item>
+        <item>银色</item>
+        <item>青色</item>
+    </array>
+
+    <array name="paintstyle">
+        <item>画笔</item>
+        <item>橡皮擦</item>
+    </array>
+</resources>

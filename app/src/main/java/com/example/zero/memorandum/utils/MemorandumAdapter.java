@@ -3,20 +3,14 @@ package com.example.zero.memorandum.utils;
 import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AnimationUtils;
-import android.view.animation.RotateAnimation;
 import android.widget.BaseAdapter;
-import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.example.zero.memorandum.Main_activity;
+import com.example.zero.memorandum.activity.Main_activity;
 import com.example.zero.memorandum.R;
 
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 /**
  * Created by Zero on 2017/2/16.

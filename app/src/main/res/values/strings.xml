@@ -9,5 +9,8 @@
     <string name="interval">自动保存时间间隔</string>
     <string name="save">保 存</string>
     <string name="cancel">取 消</string>
+    <string name="editing">编辑备忘录</string>
+    <string name="painter">画板</string>
+
 
 </resources>

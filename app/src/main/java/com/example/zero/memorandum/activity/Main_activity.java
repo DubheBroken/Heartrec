@@ -1,4 +1,4 @@
-package com.example.zero.memorandum;
+package com.example.zero.memorandum.activity;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
@@ -20,6 +20,7 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.example.zero.memorandum.R;
 import com.example.zero.memorandum.custom.CustomPopwindow;
 import com.example.zero.memorandum.utils.Constant;
 import com.example.zero.memorandum.utils.DbManager;
