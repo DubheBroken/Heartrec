@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -49,5 +50,17 @@
         android:backgroundTint="@color/colorAccent"
         />
 
+    <!--分割线-->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/line_gray"/>
+
+    <fragment
+        android:id="@+id/fragment_navigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:name="com.example.zero.memorandum.fragment.Bottom_Fragment"
+        tools:layout="@layout/bottom_layout" />
 
 </LinearLayout>

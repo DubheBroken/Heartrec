@@ -1,7 +1,7 @@
 package com.example.zero.memorandum.activity;
 
+import android.Manifest;
 import android.annotation.TargetApi;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -10,6 +10,10 @@ import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -18,17 +22,23 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.zero.memorandum.AppData;
 import com.example.zero.memorandum.R;
+import com.example.zero.memorandum.adapter.Paint_Adapter;
 import com.example.zero.memorandum.custom.CustomPopwindow;
+import com.example.zero.memorandum.entity.Paint_Entity;
+import com.example.zero.memorandum.fragment.Bottom_Fragment;
 import com.example.zero.memorandum.utils.Constant;
 import com.example.zero.memorandum.utils.DbManager;
-import com.example.zero.memorandum.utils.MemorandumAdapter;
-import com.example.zero.memorandum.utils.Memorandum_JavaBean;
+import com.example.zero.memorandum.adapter.Text_Adapter;
+import com.example.zero.memorandum.entity.Text_Entity;
 import com.example.zero.memorandum.utils.SqliteHelper;
 import com.readystatesoftware.systembartint.SystemBarTintManager;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,14 +46,25 @@ import java.util.List;
  * Created by Zero on 2017/2/15.
  */
 
-public class Main_activity extends Activity implements OnClickListener {
+public class Main_activity extends FragmentActivity implements OnClickListener {
 
-    private List<Memorandum_JavaBean> list;
+    private List<Text_Entity> listText;
+    private List<Paint_Entity> listPaint;
 
     private ListView listView;
-    private MemorandumAdapter adapter;
+    private Text_Adapter textAdapter;
+    private Paint_Adapter paintAdapter;
     private SqliteHelper sqliteHelper;
-//    注册控件
+
+    //    Fragment相关
+    private FragmentTransaction transaction;
+    private FragmentManager fragmentManager;
+    private Bottom_Fragment bottom_fragment = new Bottom_Fragment();
+
+    //    注册控件
+    private TextView bottomBtnText;
+    private TextView bottomBtnPaint;
+    private TextView bottomBtnRecord;
     private FloatingActionButton FAB_new_one;
     private CustomPopwindow customPopwindow;
 
@@ -51,33 +72,21 @@ public class Main_activity extends Activity implements OnClickListener {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_layout);
+
+
+//        初始化页面切换相关组件
+        fragmentManager = getSupportFragmentManager();
+
+//        请求权限
+        ActivityCompat.requestPermissions(Main_activity.this, new String[]{
+                Manifest.permission.READ_CONTACTS,
+                Manifest.permission.SET_WALLPAPER,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.MOUNT_UNMOUNT_FILESYSTEMS}, 1);
+
         sqliteHelper = DbManager.getIntance(this);
         initView();
 
-        //    item点击事件
-        listView.setOnItemClickListener((new AdapterView.OnItemClickListener() {
-
-                    @Override
-                    public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
-                                            long arg3) {
-                        // TODO Auto-generated method stub);
-                        Intent intent = new Intent(Main_activity.this, NewOne_activity.class);
-                        intent.putExtra("id", list.get(arg2).id);//将被点击的item id传递到新活动
-                        Log.i("-------intent-------","Extra="+list.get(arg2).id);
-                        startActivity(intent);
-                    }
-                })
-        );
-//        item长按事件
-        listView.setOnItemLongClickListener((new AdapterView.OnItemLongClickListener(){
-
-            @Override
-            public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2,
-                                           long arg3) {
-                showMultiDia(list.get(arg2).id);
-                return true;
-            }
-        }));
 
 //        沉浸式状态栏
         // 4.4及以上版本开启
@@ -93,7 +102,7 @@ public class Main_activity extends Activity implements OnClickListener {
         tintManager.setTintColor(getColor(R.color.colorAccent));
     }
 
-//    沉浸式状态栏
+    //    沉浸式状态栏
     @TargetApi(19)
     private void setTranslucentStatus(boolean on) {
         Window win = getWindow();
@@ -107,8 +116,8 @@ public class Main_activity extends Activity implements OnClickListener {
         win.setAttributes(winParams);
     }
 
-//    删除记录并刷新GridView
-    public void delete(final String id){
+    //    删除记录并刷新ListView
+    public void deleteText(final String id) {
 
         new AlertDialog.Builder(this).setTitle("确认要删除吗？")
                 .setIcon(android.R.drawable.ic_dialog_info)
@@ -120,7 +129,7 @@ public class Main_activity extends Activity implements OnClickListener {
 //                            删除自动保存的数据
                         SQLiteDatabase db = sqliteHelper.getWritableDatabase();//打开数据库
                         try {
-                            String sql = "delete from " + Constant.TABLE_NAME + " where " + Constant.ID + "=" + id + ";";
+                            String sql = "deleteText from " + Constant.TABLE_NAME + " where " + Constant.ID + "=" + id + ";";
                             Log.i("strsql", sql);
                             DbManager.execSQL(db, sql);
                             Log.i("execSQL", "删除数据成功");
@@ -128,6 +137,7 @@ public class Main_activity extends Activity implements OnClickListener {
                             Log.e("execSQL", "删除数据出错");
                         }
                         initView();
+                        initAdapter(1);
                     }
                 })
                 .setNegativeButton("取消", new DialogInterface.OnClickListener() {
@@ -140,17 +150,16 @@ public class Main_activity extends Activity implements OnClickListener {
 
     }
 
-//    右键菜单
-    private void showMultiDia(final String id)
-    {
-        AlertDialog.Builder multiDia=new AlertDialog.Builder(Main_activity.this);
+    //    右键菜单
+    private void showDeleteDia(final String id) {
+        AlertDialog.Builder multiDia = new AlertDialog.Builder(Main_activity.this);
         multiDia.setTitle("选择操作");
         multiDia.setPositiveButton("删除", new DialogInterface.OnClickListener() {
 
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 // TODO Auto-generated method stub
-                delete(id);
+                deleteText(id);
             }
         });
         multiDia.create().show();
@@ -158,26 +167,40 @@ public class Main_activity extends Activity implements OnClickListener {
 
     //      点击事件
     @Override
-    public void onClick(View v){
+    public void onClick(View v) {
         Intent intent;
-        switch (v.getId()){
+        switch (v.getId()) {
             case R.id.btn_newone:
-                customPopwindow = new CustomPopwindow(this,this);
+                customPopwindow = new CustomPopwindow(this, this);
                 customPopwindow.setBackgroundDrawable(null);
-                customPopwindow.showAsDropDown(v,-20,-620,Gravity.TOP);
+                customPopwindow.showAsDropDown(v, -20, -620, Gravity.TOP);
                 break;
             case R.id.btn_text:
-                intent = new Intent(this,NewOne_activity.class);
+                intent = new Intent(this, NewOne_activity.class);
                 startActivity(intent);
                 customPopwindow.dismiss();
                 break;
             case R.id.btn_picture:
-                Toast.makeText(this,"敬请期待",Toast.LENGTH_SHORT).show();
+                intent = new Intent(this, Painter_activity.class);
+                startActivity(intent);
                 customPopwindow.dismiss();
                 break;
             case R.id.btn_sound:
-                Toast.makeText(this,"敬请期待",Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "敬请期待", Toast.LENGTH_SHORT).show();
                 customPopwindow.dismiss();
+                break;
+            case R.id.bottom_btn_text:
+                //切换到文字记事列表
+                initAdapter(1);
+                listView.setAdapter(textAdapter);
+                break;
+            case R.id.bottom_btn_paint:
+                //切换到图片记事列表
+                initAdapter(2);
+                listView.setAdapter(paintAdapter);
+                break;
+            case R.id.bottom_btn_record:
+                //切换到录音记事列表
                 break;
         }
     }
@@ -189,31 +212,121 @@ public class Main_activity extends Activity implements OnClickListener {
 //        实例化控件
         listView = (ListView) findViewById(R.id.itemlist);
         FAB_new_one = (FloatingActionButton) findViewById(R.id.btn_newone);
-        list = new ArrayList<Memorandum_JavaBean>();
-        //查询数据
-        SQLiteDatabase db = sqliteHelper.getWritableDatabase();
-        Log.i("execSQL","db实例化完成");
-        Cursor cursor = null;
-            String sql = "select * from "+ Constant.TABLE_NAME+" order by "+Constant.TIME+" desc;";
-            Log.i("strsql",sql);
-            cursor = DbManager.selectDataBySql(db,sql,null);
-        if(cursor!=null) {
-            Log.i("cursor","cursor不为空");
-            while (cursor.moveToNext()) {
-                Memorandum_JavaBean memorandum_javaBean = new Memorandum_JavaBean();
-                memorandum_javaBean.id = cursor.getString(cursor.getColumnIndex("id"));
-                memorandum_javaBean.time = cursor.getString(cursor.getColumnIndex("time"));
-                memorandum_javaBean.substance = cursor.getString(cursor.getColumnIndex("substance"));
-                list.add(memorandum_javaBean);
-            }
-        }
-        db.close();//关闭数据库
-        Log.i("execSQL","数据库已关闭");
-        adapter = new MemorandumAdapter(this,list);
-        listView.setAdapter(adapter);
+        bottomBtnText = (TextView) findViewById(R.id.bottom_btn_text);
+        bottomBtnPaint = (TextView) findViewById(R.id.bottom_btn_paint);
+        bottomBtnRecord = (TextView) findViewById(R.id.bottom_btn_record);
+
+        initAdapter(1);
 
         //        点击监听
         FAB_new_one.setOnClickListener(this);
+        bottomBtnText.setOnClickListener(this);
+        bottomBtnPaint.setOnClickListener(this);
+        bottomBtnRecord.setOnClickListener(this);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        sqliteHelper = DbManager.getIntance(this);
+        initView();
+        initAdapter(1);
+    }
+
+    /**
+     * 初始化Adapter
+     */
+    private void initAdapter(int i) {
+        switch (i) {
+            case 1:
+//                初始化文字适配器
+                    listText = new ArrayList<>();
+                    //查询数据
+                    SQLiteDatabase db = sqliteHelper.getWritableDatabase();
+                    Log.i("execSQL", "db实例化完成");
+                    Cursor cursor = null;
+                    String sql = "select * from " + Constant.TABLE_NAME + " order by " + Constant.TIME + " desc;";
+                    Log.i("strsql", sql);
+                    cursor = DbManager.selectDataBySql(db, sql, null);
+                    if (cursor != null) {
+                        Log.i("cursor", "cursor不为空");
+                        while (cursor.moveToNext()) {
+                            Text_Entity text_entity = new Text_Entity();
+                            text_entity.setId(cursor.getString(cursor.getColumnIndex("id")));
+                            text_entity.setTime(cursor.getString(cursor.getColumnIndex("time")));
+                            text_entity.setSubstance(cursor.getString(cursor.getColumnIndex("substance")));
+                            listText.add(text_entity);
+                        }
+                    }
+                    db.close();//关闭数据库
+                    Log.i("execSQL", "数据库已关闭");
+                    textAdapter = new Text_Adapter(this, listText);
+                    listView.setAdapter(textAdapter);
+
+                //    item点击事件
+                listView.setOnItemClickListener((new AdapterView.OnItemClickListener() {
+
+                            @Override
+                            public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
+                                                    long arg3) {
+                                // TODO Auto-generated method stub);
+                                Intent intent = new Intent(Main_activity.this, NewOne_activity.class);
+                                intent.putExtra("id", listText.get(arg2).getId());//将被点击的item id传递到新活动
+                                Log.i("-------intent-------", "Extra=" + listText.get(arg2).getId());
+                                startActivity(intent);
+                            }
+                        })
+                );
+//        item长按事件
+                listView.setOnItemLongClickListener((new AdapterView.OnItemLongClickListener() {
+
+                    @Override
+                    public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2,
+                                                   long arg3) {
+                        showDeleteDia(listText.get(arg2).getId());
+                        return true;
+                    }
+                }));
+
+                break;
+            case 2:
+                //初始化图片适配器
+                    listPaint = new ArrayList<>();
+                    getImage(listPaint);
+                    paintAdapter = new Paint_Adapter(this, listPaint);
+
+                //    item点击事件
+                listView.setOnItemClickListener((new AdapterView.OnItemClickListener() {
+
+                            @Override
+                            public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
+                                                    long arg3) {
+                                // TODO Auto-generated method stub);
+                                Intent intent = new Intent(Main_activity.this, Painter_activity.class);
+                                intent.putExtra("fileName", listPaint.get(arg2).getFilename());//将被点击的item文件名传递到新活动
+                                Log.i("-------intent-------", "Extra=" + listPaint.get(arg2).getFilename());
+                                startActivity(intent);
+                            }
+                        })
+                );
+//        item长按事件
+                listView.setOnItemLongClickListener((new AdapterView.OnItemLongClickListener() {
+
+                    @Override
+                    public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2,
+                                                   long arg3) {
+                        showDeleteDia(listPaint.get(arg2).getFilename());
+                        return true;
+                    }
+                }));
+                break;
+            case 3:
+                //初始化录音适配器
+
+                break;
+        }
+
+
     }
 
     @Override
@@ -221,8 +334,30 @@ public class Main_activity extends Activity implements OnClickListener {
         super.onRestart();
         sqliteHelper = DbManager.getIntance(this);
         initView();
+        initAdapter(1);
     }
 
-
+    private void getImage(List<Paint_Entity> list) {
+        File file = new File(AppData.getImageFilePath());
+        File[] allfiles = file.listFiles();
+        if (allfiles != null) {
+            for (int i = 0; i < allfiles.length; i++) {
+                File fi = allfiles[i];
+                if (fi.isFile()) {
+                    int idx = fi.getPath().lastIndexOf(".");
+                    if (idx <= 0) {
+                        continue;
+                    }
+                    String suffix = fi.getPath().substring(idx);
+                    if (suffix.toLowerCase().equals(".png")) {
+                        Paint_Entity paint_entity = new Paint_Entity();
+                        paint_entity.setTime(fi.getName());
+                        paint_entity.setFilename(fi.getPath());
+                        list.add(paint_entity);
+                    }
+                }
+            }
+        }
+    }
 
 }

@@ -11,16 +11,13 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -28,7 +25,7 @@ import android.widget.TextView;
 import com.example.zero.memorandum.R;
 import com.example.zero.memorandum.utils.Constant;
 import com.example.zero.memorandum.utils.DbManager;
-import com.example.zero.memorandum.utils.Memorandum_JavaBean;
+import com.example.zero.memorandum.entity.Text_Entity;
 import com.example.zero.memorandum.utils.SqliteHelper;
 import com.readystatesoftware.systembartint.SystemBarTintManager;
 
@@ -49,7 +46,7 @@ public class NewOne_activity extends Activity implements OnClickListener {
     private SqliteHelper sqliteHelper;
     //    注册控件
     private EditText editText_substance;
-    private TextView textView_time, btn_save, btn_cancel, btn_topaint;
+    private TextView textView_time, btn_save, btn_cancel;
     private LinearLayout layout;
 
     //    数据变量
@@ -158,12 +155,10 @@ public class NewOne_activity extends Activity implements OnClickListener {
         btn_cancel = (TextView) findViewById(R.id.btn_cancel);
         textView_time = (TextView) findViewById(R.id.text_time);
         layout = (LinearLayout) findViewById(R.id.layout_newone);
-        btn_topaint = (TextView) findViewById(R.id.btn_topaint);
 
 //        点击监听
         btn_save.setOnClickListener(this);
         btn_cancel.setOnClickListener(this);
-        btn_topaint.setOnClickListener(this);
 
         editText_substance.addTextChangedListener(textWatcher);
         textView_time.setText(nowtime);
@@ -186,10 +181,6 @@ public class NewOne_activity extends Activity implements OnClickListener {
                 save();
                 finish();
                 break;
-            case R.id.btn_topaint:
-                intent = new Intent(this,Painter_activity.class);
-                startActivity(intent);
-                break;
         }
     }
 
@@ -207,14 +198,14 @@ public class NewOne_activity extends Activity implements OnClickListener {
             if (cursor != null) {
                 Log.i("cursor", "cursor不为空");
                 cursor.moveToNext();
-                Memorandum_JavaBean memorandum_javaBean = new Memorandum_JavaBean();
-                memorandum_javaBean.id = cursor.getString(cursor.getColumnIndex("id"));
-                memorandum_javaBean.time = cursor.getString(cursor.getColumnIndex("time"));
-                memorandum_javaBean.substance = cursor.getString(cursor.getColumnIndex("substance"));
+                Text_Entity text_entity = new Text_Entity();
+                text_entity.setId(cursor.getString(cursor.getColumnIndex("id")));
+                text_entity.setTime(cursor.getString(cursor.getColumnIndex("time")));
+                text_entity.setSubstance(cursor.getString(cursor.getColumnIndex("substance")));
 
                 db.close();//关闭数据库
                 Log.i("execSQL", "数据库已关闭");
-                if (memorandum_javaBean.substance.equals(substance)) {//没有改变内容
+                if (text_entity.getSubstance().equals(substance)) {//没有改变内容
                     finish();//直接关闭
                 } else {
                     showDialog();//询问是否保存
@@ -269,7 +260,7 @@ public class NewOne_activity extends Activity implements OnClickListener {
     public void delete(int id) {
         SQLiteDatabase db = sqliteHelper.getWritableDatabase();//打开数据库
         try {
-            String sql = "delete from " + Constant.TABLE_NAME + " where " + Constant.ID + "=\"" + id + "\";";
+            String sql = "deleteText from " + Constant.TABLE_NAME + " where " + Constant.ID + "=\"" + id + "\";";
             Log.i("strsql", sql);
             DbManager.execSQL(db, sql);
             Log.i("execSQL", "删除数据成功");

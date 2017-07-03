@@ -7,6 +7,7 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <!--读取SD卡-->
     <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS"/>
+    <uses-permission android:name="android.permission.READ_CONTACTS"/>
 
     <supports-screens
         android:smallScreens="true"
@@ -39,7 +40,9 @@
 
         <activity
             android:name=".activity.Painter_activity"
-            android:label="@string/painter">
+            android:label="@string/painter"
+            android:exported="true"
+            >
         </activity>
 
     </application>

@@ -25,6 +25,8 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
+import com.example.zero.memorandum.AppData;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
@@ -68,11 +70,11 @@ public class PaintView extends View {
     }
 
     public PaintView(Context context) {
-        this(context, 800, 600);
+        this(context, 1920, 1080);
     }
 
     public PaintView(Context context, @Nullable AttributeSet attrs) {
-        this(context, 800, 600);
+        this(context, 1920, 1080);
     }
 
     public PaintView(Context context, int w, int h) {
@@ -244,10 +246,15 @@ public class PaintView extends View {
     //保存到sd卡
     public void saveToSDCard() {
         //获得系统当前时间，并以该时间作为文件名
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy:MM:dd_HH:mm:ss");
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy:MM:dd:HH:mm:ss");
         Date curDate = new Date(System.currentTimeMillis());//获取当前时间
-        String str = formatter.format(curDate) + "paint.png";
-        File file = new File("sdcard/" + str);
+        String str = "paint" + formatter.format(curDate) + ".png";
+        File file = new File(AppData.getImageFilePath());
+        //判断文件夹是否存在,如果不存在则创建文件夹
+        if (!file.exists()) {
+            file.mkdir();
+        }
+        file = new File(AppData.getImageFilePath() + str);
         FileOutputStream fos = null;
         try {
             fos = new FileOutputStream(file);
@@ -255,15 +262,16 @@ public class PaintView extends View {
             e.printStackTrace();
         }
         mBitmap.compress(CompressFormat.PNG, 100, fos);
-        //发送Sd卡的就绪广播,要不然在手机图库中不存在
-        Intent intent = new Intent(Intent.ACTION_MEDIA_MOUNTED);
+        //发送Sd卡的就绪广播,在图库中更新
+        Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
         intent.setData(Uri.fromFile(Environment.getExternalStorageDirectory()));
         context.sendBroadcast(intent);
-        Log.e("----paintView----", "图片已保存");
+        Log.i("----paintView----", "图片已保存");
     }
 
     //以下为样式修改内容
     //设置画笔样式
+
     public void selectPaintStyle(int which) {
         if (which == 0) {
             currentStyle = 1;

@@ -6,7 +6,7 @@
     >
 
     <LinearLayout
-        android:id="@+id/layout_item"
+        android:id="@+id/text_layout_item"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="horizontal"
@@ -24,7 +24,7 @@
                     android:layout_gravity="center_vertical"
                     android:layout_marginTop="8dp"
                     android:layout_marginBottom="4dp"
-                    android:id="@+id/item_substance"
+                    android:id="@+id/text_item_substance"
                     android:layout_height="wrap_content"
                     android:layout_width="match_parent"
                     android:textColor="@color/text_black"
@@ -37,7 +37,7 @@
                 <TextView
                     android:layout_marginBottom="8dp"
                     android:layout_gravity="center_vertical"
-                    android:id="@+id/item_time"
+                    android:id="@+id/text_item_time"
                     android:layout_height="wrap_content"
                     android:layout_width="match_parent"
                     android:text="@string/time"
@@ -47,7 +47,7 @@
         </LinearLayout>
 
         <TextView
-            android:id="@+id/imgbtn_arrow"
+            android:id="@+id/text_item_imgbtn_arrow"
             android:contentDescription="展开"
             android:layout_gravity="center_horizontal|top"
             android:layout_marginTop="12dp"
