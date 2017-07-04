@@ -6,22 +6,32 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.Display;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.example.zero.memorandum.AppData;
 import com.example.zero.memorandum.custom.PaintView;
 
 import com.example.zero.memorandum.R;
+
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Created by Developer on 2017/6/27.
@@ -29,15 +39,18 @@ import com.example.zero.memorandum.R;
 
 public class Painter_activity extends Activity implements OnClickListener {
 
-    private int penSize = 9;
     private Intent intent;
     private String fileName;
+    private SharedPreferences sp;
+    private List<String> paintColorList;
+    private final static int REQUEST_CODE = 1;
+    private int select_paint_style_index = 1;//1笔，0橡皮
 
     //    注册控件
     private TextView btnRevokePaint;
     private TextView btnRedoPaint;
     private TextView btnCleanPaint;
-    private TextView btnPenStylePaint;
+    private ImageView btnPenStylePaint;
     private TextView btnPenColorPaint;
     private TextView btnBackPaint;
     private TextView btnSavePaint;
@@ -63,11 +76,20 @@ public class Painter_activity extends Activity implements OnClickListener {
 //            为控件赋值
                 initData(fileName);
             } else {
-                initData();
+                initData(null);
+                //获得系统当前时间，并以该时间作为文件名
+                SimpleDateFormat formatter = new SimpleDateFormat("yyyy:MM:dd:HH:mm:ss");
+                Date curDate = new Date(System.currentTimeMillis());//获取当前时间
+                fileName = AppData.getImageFilePath()+"paint" + formatter.format(curDate) + ".png";
             }
         }
 
         setTranslucentStatus(true);
+    }
+
+    @Override
+    public void onBackPressed() {
+        showBackDialog();
     }
 
     private void initData(String fileName) {
@@ -75,10 +97,18 @@ public class Painter_activity extends Activity implements OnClickListener {
         Display defaultDisplay = getWindowManager().getDefaultDisplay();
         int screenWidth = defaultDisplay.getWidth();
         int screenHeight = defaultDisplay.getHeight() - 110;
-        paintViewPad = new PaintView(this, screenWidth, screenHeight);
+        paintViewPad = new PaintView(this, screenWidth, screenHeight, fileName);
         paint_linear.addView(paintViewPad);
         paintViewPad.requestFocus();
+        sp = getSharedPreferences("config", Context.MODE_PRIVATE);
+        AppData.setPenColor(sp.getInt("pencolor", 0xff0000));
+        AppData.setPenSize(sp.getInt("pensize", 9));
+        paintColorList = Arrays.asList(getResources().getStringArray(R.array.paintcolor));
+        paintViewPad.selectPaintColor(AppData.getPenColor());
+        paintViewPad.selectPaintStyle(select_paint_style_index);
+        seekBar_pen_size.setProgress(AppData.getPenSize());
         paintViewPad.selectPaintSize(seekBar_pen_size.getProgress());
+
     }
 
     public void initView() {
@@ -87,7 +117,7 @@ public class Painter_activity extends Activity implements OnClickListener {
         btnRevokePaint = (TextView) findViewById(R.id.btn_revoke_paint);
         btnRedoPaint = (TextView) findViewById(R.id.btn_redo_paint);
         btnCleanPaint = (TextView) findViewById(R.id.btn_clean_paint);
-        btnPenStylePaint = (TextView) findViewById(R.id.btn_pen_style_paint);
+        btnPenStylePaint = (ImageView) findViewById(R.id.btn_pen_style_paint);
         btnPenColorPaint = (TextView) findViewById(R.id.btn_pen_color_paint);
         btnBackPaint = (TextView) findViewById(R.id.btn_back_paint);
         text_pen_size = (TextView) findViewById(R.id.text_pen_size);
@@ -104,6 +134,7 @@ public class Painter_activity extends Activity implements OnClickListener {
         btnBackPaint.setOnClickListener(this);
         seekBar_pen_size.setOnSeekBarChangeListener(new MySeekChangeListener());
 
+        btnPenStylePaint.getBackground().setLevel(0);
 //        btnRevokePaint.setEnabled(false);
 //        btnRedoPaint.setEnabled(false);
 
@@ -114,6 +145,7 @@ public class Painter_activity extends Activity implements OnClickListener {
 //                btnRedoPaint.setEnabled(paintViewPad.haveDeletePath());
 //            }
 //        });
+
     }
 
     @Override
@@ -133,11 +165,12 @@ public class Painter_activity extends Activity implements OnClickListener {
                 break;
             case R.id.btn_pen_style_paint:
                 //设置画笔样式
-                showMoreDialog(v);
+                changePenStyle();
                 break;
             case R.id.btn_pen_color_paint:
                 //选择画笔颜色
-                showPaintColorDialog(v);
+                intent = new Intent(this, ColorSelect_activity.class);
+                startActivityForResult(intent, REQUEST_CODE);
                 break;
             case R.id.btn_back_paint:
                 //返回
@@ -145,10 +178,17 @@ public class Painter_activity extends Activity implements OnClickListener {
                 break;
             case R.id.btn_save_paint:
                 //保存
-                paintViewPad.saveToSDCard();
+                paintViewPad.saveToSDCard(fileName);
                 finish();
                 break;
         }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        AppData.setPenColor(data.getIntExtra("color",0xff0000));
+        paintViewPad.selectPaintColor(AppData.getPenColor());
+        Log.i("---onActivityResult---", "" + AppData.getPenColor());
     }
 
     public void showBackDialog() {
@@ -159,7 +199,7 @@ public class Painter_activity extends Activity implements OnClickListener {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         // 点击“保存”后的操作，保存数据
-                        paintViewPad.saveToSDCard();
+                        paintViewPad.saveToSDCard(fileName);
                         finish();
                     }
                 })
@@ -186,55 +226,24 @@ public class Painter_activity extends Activity implements OnClickListener {
         dialog.getWindow().setAttributes(params);
     }
 
-    private int select_paint_color_index = 0;
-    private int select_paint_style_index = 0;
-    //private int select_paint_size_index = 0;
-
     /**
      * 显示画笔样式选项对话框
      */
-    public void showMoreDialog(View parent) {
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-        alertDialogBuilder.setTitle("选择画笔或橡皮擦：");
-        alertDialogBuilder.setSingleChoiceItems(R.array.paintstyle, select_paint_style_index, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                select_paint_style_index = which;
-                paintViewPad.selectPaintStyle(which);
-                dialog.dismiss();
-            }
-        });
-        alertDialogBuilder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
-        alertDialogBuilder.create().show();
+    public void changePenStyle() {
+        btnPenStylePaint.getBackground().setLevel(select_paint_style_index);
+        switch (select_paint_style_index) {
+            case 0:
+                select_paint_style_index = 1;
+                Toast.makeText(this, "切换到画笔", Toast.LENGTH_SHORT).show();
+                break;
+            case 1:
+                select_paint_style_index = 0;
+                Toast.makeText(this, "切换到橡皮", Toast.LENGTH_SHORT).show();
+                break;
+        }
+        paintViewPad.selectPaintStyle(select_paint_style_index);
     }
 
-    /**
-     * 显示画笔颜色选择对话框
-     */
-    public void showPaintColorDialog(View parent) {
-        AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(this);
-        alertDialogBuilder.setTitle("选择画笔颜色：");
-        alertDialogBuilder.setSingleChoiceItems(R.array.paintcolor, select_paint_color_index, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                select_paint_color_index = which;
-                paintViewPad.selectPaintColor(which);
-                dialog.dismiss();
-            }
-        });
-        alertDialogBuilder.setNegativeButton("取消", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
-        alertDialogBuilder.create().show();
-    }
 
     /**
      * 沉浸式状态栏
@@ -252,15 +261,21 @@ public class Painter_activity extends Activity implements OnClickListener {
         win.setAttributes(winParams);
     }
 
-    private void initData() {
-        //获取的是屏幕宽高，通过控制freamlayout来控制涂鸦板大小
-        Display defaultDisplay = getWindowManager().getDefaultDisplay();
-        int screenWidth = defaultDisplay.getWidth();
-        int screenHeight = defaultDisplay.getHeight() - 102;
-        paintViewPad = new PaintView(this, screenWidth, screenHeight);
-        paint_linear.addView(paintViewPad);
-        paintViewPad.requestFocus();
-        paintViewPad.selectPaintSize(seekBar_pen_size.getProgress());
+    @Override
+    protected void onDestroy() {
+        sp = getSharedPreferences("config", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sp.edit();
+        editor.putInt("pencolor", AppData.getPenColor());
+        editor.putInt("pensize", AppData.getPenSize());
+        editor.apply();
+        super.onDestroy();
+    }
+
+    @Override
+    protected void onPause() {
+        //避免style定义的转场退出时候出现2次
+        this.overridePendingTransition(0, 0);
+        super.onPause();
     }
 
     /**
@@ -269,16 +284,16 @@ public class Painter_activity extends Activity implements OnClickListener {
     private class MySeekChangeListener implements SeekBar.OnSeekBarChangeListener {
         @Override
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-            penSize = seekBar.getProgress();
-            paintViewPad.selectPaintSize(penSize);
-            text_pen_size.setText("画笔尺寸：" + Integer.toString(penSize+1));
+            AppData.setPenSize(seekBar.getProgress());
+            paintViewPad.selectPaintSize(AppData.getPenSize());
+            text_pen_size.setText("画笔尺寸：" + Integer.toString(AppData.getPenSize() + 1));
         }
 
         @Override
         public void onStartTrackingTouch(SeekBar seekBar) {
-            penSize = seekBar.getProgress();
-            paintViewPad.selectPaintSize(penSize);
-            text_pen_size.setText("画笔尺寸：" + Integer.toString(penSize+1));
+            AppData.setPenSize(seekBar.getProgress());
+            paintViewPad.selectPaintSize(AppData.getPenSize());
+            text_pen_size.setText("画笔尺寸：" + Integer.toString(AppData.getPenSize() + 1));
         }
 
         @Override

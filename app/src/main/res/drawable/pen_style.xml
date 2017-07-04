@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<level-list xmlns:Android="http://schemas.android.com/apk/res/android">
+    <item Android:maxLevel="0"
+        Android:drawable="@drawable/btn_eraser" />
+    <item Android:maxLevel="1"
+        Android:drawable="@drawable/btn_pen_style" />
+</level-list>

@@ -15,6 +15,7 @@ import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.Picture;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.net.Uri;
@@ -54,7 +55,6 @@ public class PaintView extends View {
     private int currentColor = Color.RED;
     private int currentSize = 5;
     private int currentStyle = 1;
-    private int[] paintColor;//颜色集合
 
     private class DrawPath {
         public Path path;// 路径
@@ -70,34 +70,35 @@ public class PaintView extends View {
     }
 
     public PaintView(Context context) {
-        this(context, 1920, 1080);
+        this(context, 1920, 1080, null);
     }
 
     public PaintView(Context context, @Nullable AttributeSet attrs) {
-        this(context, 1920, 1080);
+        this(context, 1920, 1080, null);
     }
 
-    public PaintView(Context context, int w, int h) {
+    public PaintView(Context context, int w, int h, String path) {
         super(context);
         this.context = context;
         screenWidth = w;
         screenHeight = h;
-        paintColor = new int[]{
-                Color.RED, Color.BLUE, Color.GREEN, Color.YELLOW, Color.BLACK, Color.GRAY, Color.CYAN
-        };
         setLayerType(LAYER_TYPE_SOFTWARE, null);//设置默认样式，去除dis-in的黑色方框以及clear模式的黑线效果
-        initCanvas();
+        initCanvas(path);
         savePath = new ArrayList<DrawPath>();
         deletePath = new ArrayList<DrawPath>();
     }
 
-    public void initCanvas() {
+    public void initCanvas(String path) {
         setPaintStyle();
         mBitmapPaint = new Paint(Paint.DITHER_FLAG);
         //画布大小
         mBitmap = Bitmap.createBitmap(screenWidth, screenHeight, Bitmap.Config.ARGB_8888);
         mBitmap.eraseColor(Color.argb(0, 0, 0, 0));
         mCanvas = new Canvas(mBitmap);  //所有mCanvas画的东西都被保存在了mBitmap中
+        if (path != null) {
+            Bitmap bitmap = BitmapFactory.decodeFile(path);
+            mCanvas.drawBitmap(bitmap, 0, 0, null);
+        }
         mCanvas.drawColor(Color.TRANSPARENT);
     }
 
@@ -191,7 +192,7 @@ public class PaintView extends View {
         /*mBitmap = Bitmap.createBitmap(screenWidth, screenHeight,
                 Bitmap.Config.RGB_565);
         mCanvas.setBitmap(mBitmap);// 重新设置画布，相当于清空画布*/
-        initCanvas();
+        initCanvas(null);
         Iterator<DrawPath> iter = savePath.iterator();
         while (iter.hasNext()) {
             DrawPath drawPath = iter.next();
@@ -244,17 +245,17 @@ public class PaintView extends View {
     }
 
     //保存到sd卡
-    public void saveToSDCard() {
-        //获得系统当前时间，并以该时间作为文件名
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy:MM:dd:HH:mm:ss");
-        Date curDate = new Date(System.currentTimeMillis());//获取当前时间
-        String str = "paint" + formatter.format(curDate) + ".png";
+    public void saveToSDCard(String filename) {
         File file = new File(AppData.getImageFilePath());
         //判断文件夹是否存在,如果不存在则创建文件夹
         if (!file.exists()) {
             file.mkdir();
         }
-        file = new File(AppData.getImageFilePath() + str);
+        file = new File(filename);
+        if (file.exists()) {
+            //删除已存在的文件进行覆盖
+            file.delete();
+        }
         FileOutputStream fos = null;
         try {
             fos = new FileOutputStream(file);
@@ -273,12 +274,12 @@ public class PaintView extends View {
     //设置画笔样式
 
     public void selectPaintStyle(int which) {
-        if (which == 0) {
+        if (which == 1) {
             currentStyle = 1;
             setPaintStyle();
         }
         //当选择的是橡皮擦时，设置颜色为白色
-        if (which == 1) {
+        if (which == 0) {
             currentStyle = 2;
             setPaintStyle();
         }
@@ -292,8 +293,8 @@ public class PaintView extends View {
     }
 
     //设置画笔颜色
-    public void selectPaintColor(int which) {
-        currentColor = paintColor[which];
+    public void selectPaintColor(int color) {
+        currentColor = color;
         setPaintStyle();
     }
 }

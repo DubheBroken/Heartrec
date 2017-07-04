@@ -48,12 +48,12 @@
             android:background="@drawable/btn_delete"
             />
 
-        <TextView
+        <ImageView
             android:layout_margin="8dp"
             android:id="@+id/btn_pen_style_paint"
             android:layout_width="32dp"
             android:layout_height="32dp"
-            android:background="@drawable/btn_pen_style"
+            android:background="@drawable/pen_style"
             />
 
         <TextView

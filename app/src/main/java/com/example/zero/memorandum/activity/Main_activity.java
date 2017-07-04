@@ -150,8 +150,37 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
 
     }
 
+    //删除图片文件并刷新ListView
+    public void deleteImage(final String filename){
+        new AlertDialog.Builder(this).setTitle("确认要删除吗？")
+                .setIcon(android.R.drawable.ic_dialog_info)
+                .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // 点击“确认”后的操作
+                        File file = new File(filename);
+                        try {
+                            file.delete();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        initView();
+                        initAdapter(2);
+                        listView.setAdapter(paintAdapter);
+                    }
+                })
+                .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // 点击“返回”后的操作,这里不设置没有任何操作
+                    }
+                }).show();
+    }
+
     //    右键菜单
-    private void showDeleteDia(final String id) {
+    private void showDeleteTextDia(final String id) {
         AlertDialog.Builder multiDia = new AlertDialog.Builder(Main_activity.this);
         multiDia.setTitle("选择操作");
         multiDia.setPositiveButton("删除", new DialogInterface.OnClickListener() {
@@ -160,6 +189,21 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
             public void onClick(DialogInterface dialog, int which) {
                 // TODO Auto-generated method stub
                 deleteText(id);
+            }
+        });
+        multiDia.create().show();
+    }
+
+    //    右键菜单
+    private void showDeleteImageDia(final String filename) {
+        AlertDialog.Builder multiDia = new AlertDialog.Builder(Main_activity.this);
+        multiDia.setTitle("选择操作");
+        multiDia.setPositiveButton("删除", new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // TODO Auto-generated method stub
+                deleteImage(filename);
             }
         });
         multiDia.create().show();
@@ -283,7 +327,7 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
                     @Override
                     public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2,
                                                    long arg3) {
-                        showDeleteDia(listText.get(arg2).getId());
+                        showDeleteTextDia(listText.get(arg2).getId());
                         return true;
                     }
                 }));
@@ -304,7 +348,6 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
                                 // TODO Auto-generated method stub);
                                 Intent intent = new Intent(Main_activity.this, Painter_activity.class);
                                 intent.putExtra("fileName", listPaint.get(arg2).getFilename());//将被点击的item文件名传递到新活动
-                                Log.i("-------intent-------", "Extra=" + listPaint.get(arg2).getFilename());
                                 startActivity(intent);
                             }
                         })
@@ -315,7 +358,7 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
                     @Override
                     public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2,
                                                    long arg3) {
-                        showDeleteDia(listPaint.get(arg2).getFilename());
+                        showDeleteImageDia(listPaint.get(arg2).getFilename());
                         return true;
                     }
                 }));
