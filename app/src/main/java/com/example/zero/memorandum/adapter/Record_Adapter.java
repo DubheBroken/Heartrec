@@ -1,26 +1,24 @@
 package com.example.zero.memorandum.adapter;
 
 import android.content.Context;
+import android.icu.text.AlphabeticIndex;
 import android.net.Uri;
-import android.support.annotation.Nullable;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.example.zero.memorandum.R;
 import com.example.zero.memorandum.activity.Main_activity;
+import com.example.zero.memorandum.activity.Record_activity;
 import com.example.zero.memorandum.entity.Paint_Entity;
+import com.example.zero.memorandum.entity.Record_Entity;
 
-import java.io.File;
-import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -28,12 +26,12 @@ import java.util.List;
  * Created by Developer on 2017/7/3.
  */
 
-public class Paint_Adapter extends BaseAdapter {
+public class Record_Adapter extends BaseAdapter {
 
     private Context context;
-    private List<Paint_Entity> list;
+    private List<Record_Entity> list;
 
-    public Paint_Adapter(Main_activity mainActivity, List<Paint_Entity> list) {
+    public Record_Adapter(Main_activity mainActivity, List<Record_Entity> list) {
         this.context = mainActivity;
         this.list = list;
     }
@@ -59,12 +57,12 @@ public class Paint_Adapter extends BaseAdapter {
         if (view == null) {
             holder = new ViewHolder();
             //引入布局
-            view = View.inflate(context, R.layout.paint_item_layout, null);
+            view = View.inflate(context, R.layout.record_item_layout, null);
             //实例化对象
-            holder.layout = (LinearLayout) view.findViewById(R.id.paint_layout_item);
-            holder.time = (TextView) view.findViewById(R.id.paint_item_time);
-            holder.image = (ImageView) view.findViewById(R.id.paint_item_image);
-            holder.imgbtn_arrow = (TextView) view.findViewById(R.id.paint_item_imgbtn_arrow);
+            holder.layout = (LinearLayout) view.findViewById(R.id.record_layout_item);
+            holder.time = (TextView) view.findViewById(R.id.record_item_time);
+            holder.image = (TextView) view.findViewById(R.id.record_item_play);
+            holder.seekBar = (SeekBar) view.findViewById(R.id.seekbar_progress);
 
             view.setTag(holder);
         } else {
@@ -73,7 +71,7 @@ public class Paint_Adapter extends BaseAdapter {
 
 //        处理时间字符串
         String time = list.get(i).getTime();
-        time = time.substring(5, time.length());
+        time = time.substring(6, time.length());
         Log.i("---time---", time);
         SimpleDateFormat oldFormatter = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
         SimpleDateFormat newFormatter = new SimpleDateFormat("yyyy年MM月dd日 HH:mm");
@@ -82,32 +80,31 @@ public class Paint_Adapter extends BaseAdapter {
 
         //给控件赋值
         holder.time.setText(time);
-        holder.image.setImageURI(Uri.parse((list.get(i).getFilename())));
 
         final ViewHolder finalHolder = holder;
         final LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) finalHolder.image.getLayoutParams();
         final int width = params.width;
         final int height = params.height;
-        holder.imgbtn_arrow.setOnClickListener(new View.OnClickListener() {
+        holder.image.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 switch (v.getId()) {
                     case R.id.paint_item_imgbtn_arrow:
 //                        v.startAnimation(AnimationUtils.loadAnimation(context,R.anim.rotate90));//旋转动画，时间不同步弃用
-                        switch (v.getBackground().getLevel()) {
-                            case 0:
-                                v.getBackground().setLevel(1);
-                                params.width = ViewGroup.LayoutParams.WRAP_CONTENT;
-                                params.height = ViewGroup.LayoutParams.WRAP_CONTENT;
-                                finalHolder.image.setLayoutParams(params);
-                                break;
-                            case 1:
-                                v.getBackground().setLevel(0);
-                                params.width = width;
-                                params.height = height;
-                                finalHolder.image.setLayoutParams(params);
-                                break;
-                        }
+//                        switch (v.getBackground().getLevel()) {
+//                            case 0:
+//                                v.getBackground().setLevel(1);
+//                                params.width = ViewGroup.LayoutParams.WRAP_CONTENT;
+//                                params.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+//                                finalHolder.image.setLayoutParams(params);
+//                                break;
+//                            case 1:
+//                                v.getBackground().setLevel(0);
+//                                params.width = width;
+//                                params.height = height;
+//                                finalHolder.image.setLayoutParams(params);
+//                                break;
+//                        }
                         break;
                 }
             }
@@ -118,8 +115,8 @@ public class Paint_Adapter extends BaseAdapter {
     private class ViewHolder {
         LinearLayout layout;
         TextView time;//时间
-        ImageView image;//图片
-        TextView imgbtn_arrow;//箭头
+        TextView image;//播放按钮
+        SeekBar seekBar;//进度条
     }
 
     /**

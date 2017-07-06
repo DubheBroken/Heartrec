@@ -8,10 +8,28 @@ import android.app.Application;
 
 public class AppData extends Application {
 
+    private static String appHomePath = "sdcard/MyMemorandum/";
     private static String imageFilePath = "sdcard/MyMemorandum/paint/";
     private static String recordFilePath = "sdcard/MyMemorandum/record/";
     private static int penColor = 0xff0000;//画笔颜色，默认红色
     private static int penSize = 9;//画笔尺寸
+    private static int finalPage = 1;//最后访问的页面，默认文本
+
+    public static int getFinalPage() {
+        return finalPage;
+    }
+
+    public static void setFinalPage(int finalPage) {
+        AppData.finalPage = finalPage;
+    }
+
+    public static String getAppHomePath() {
+        return appHomePath;
+    }
+
+    public static void setAppHomePath(String appHomePath) {
+        AppData.appHomePath = appHomePath;
+    }
 
     public static String getImageFilePath() {
         return imageFilePath;

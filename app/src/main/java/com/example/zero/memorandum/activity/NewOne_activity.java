@@ -22,6 +22,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.example.zero.memorandum.AppData;
 import com.example.zero.memorandum.R;
 import com.example.zero.memorandum.utils.Constant;
 import com.example.zero.memorandum.utils.DbManager;
@@ -72,6 +73,7 @@ public class NewOne_activity extends Activity implements OnClickListener {
         nowtime = formatter.format(curtime);
 
         initView();//初始化界面
+        AppData.setFinalPage(1);
 
 //        获取intent
         intent = getIntent();
@@ -86,17 +88,18 @@ public class NewOne_activity extends Activity implements OnClickListener {
         }
 
         //        沉浸式状态栏
-        // 4.4及以上版本开启
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+        // 4.4以上版本开启
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
             setTranslucentStatus(true);
+
+
+            SystemBarTintManager tintManager = new SystemBarTintManager(this);
+            tintManager.setStatusBarTintEnabled(true);
+            tintManager.setNavigationBarTintEnabled(true);
+
+            // 状态栏背景色
+            tintManager.setTintColor(getColor(R.color.colorAccent));
         }
-
-        SystemBarTintManager tintManager = new SystemBarTintManager(this);
-        tintManager.setStatusBarTintEnabled(true);
-        tintManager.setNavigationBarTintEnabled(true);
-
-        // 状态栏背景色
-        tintManager.setTintColor(getColor(R.color.colorAccent));
 
 
 //        自动保存

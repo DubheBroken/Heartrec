@@ -18,8 +18,8 @@
 
     <View
         android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/gray"
+        android:layout_height="3dp"
+        android:background="@drawable/line_top"
         />
 
      <ListView
@@ -53,8 +53,8 @@
     <!--分割线-->
     <View
         android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/line_gray"/>
+        android:layout_height="3dp"
+        android:background="@drawable/line_bottom"/>
 
     <fragment
         android:id="@+id/fragment_navigation"

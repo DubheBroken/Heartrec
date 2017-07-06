@@ -99,19 +99,19 @@ public class ColorSelect_activity extends Activity implements OnCheckedChangeLis
                 radioBluegreen.setChecked(false);
                 switch (checkedId) {
                     case R.id.radio_red:
-                        color = getColor(R.color.red);
+                        color = getResources().getColor(R.color.red);
                         break;
                     case R.id.radio_orange:
-                        color = getColor(R.color.orange);
+                        color = getResources().getColor(R.color.orange);
                         break;
                     case R.id.radio_yellow:
-                        color = getColor(R.color.yellow);
+                        color = getResources().getColor(R.color.yellow);
                         break;
                     case R.id.radio_green:
-                        color = getColor(R.color.green);
+                        color = getResources().getColor(R.color.green);
                         break;
                     case R.id.radio_bluegreen:
-                        color = getColor(R.color.bluegreen);
+                        color = getResources().getColor(R.color.bluegreen);
                         break;
                 }
                 break;

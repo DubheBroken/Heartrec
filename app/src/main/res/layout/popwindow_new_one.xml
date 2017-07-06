@@ -43,7 +43,7 @@
             android:background="@drawable/rounded"
             android:layout_width="72dp"
             android:layout_height="36dp"
-            android:text="语音"
+            android:text="录音"
             android:layout_gravity="center"
             android:gravity="center"
             android:textSize="14sp"

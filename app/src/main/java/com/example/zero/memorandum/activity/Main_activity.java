@@ -12,8 +12,6 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -21,16 +19,18 @@ import android.view.View.OnClickListener;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AdapterView;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.zero.memorandum.AppData;
 import com.example.zero.memorandum.R;
 import com.example.zero.memorandum.adapter.Paint_Adapter;
+import com.example.zero.memorandum.adapter.Record_Adapter;
 import com.example.zero.memorandum.custom.CustomPopwindow;
 import com.example.zero.memorandum.entity.Paint_Entity;
-import com.example.zero.memorandum.fragment.Bottom_Fragment;
+import com.example.zero.memorandum.entity.Record_Entity;
 import com.example.zero.memorandum.utils.Constant;
 import com.example.zero.memorandum.utils.DbManager;
 import com.example.zero.memorandum.adapter.Text_Adapter;
@@ -50,32 +50,31 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
 
     private List<Text_Entity> listText;
     private List<Paint_Entity> listPaint;
+    private List<Record_Entity> listRecord;
 
     private ListView listView;
     private Text_Adapter textAdapter;
     private Paint_Adapter paintAdapter;
+    private Record_Adapter recordAdapter;
     private SqliteHelper sqliteHelper;
 
-    //    Fragment相关
-    private FragmentTransaction transaction;
-    private FragmentManager fragmentManager;
-    private Bottom_Fragment bottom_fragment = new Bottom_Fragment();
-
     //    注册控件
-    private TextView bottomBtnText;
-    private TextView bottomBtnPaint;
-    private TextView bottomBtnRecord;
     private FloatingActionButton FAB_new_one;
     private CustomPopwindow customPopwindow;
+    private LinearLayout btnTextNavigation;
+    private ImageView imageText;
+    private TextView bottomBtnText;
+    private LinearLayout btnPaintNavigation;
+    private ImageView imagePaint;
+    private TextView bottomBtnPaint;
+    private LinearLayout btnRecordNavigation;
+    private ImageView imageRecord;
+    private TextView bottomBtnRecord;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_layout);
-
-
-//        初始化页面切换相关组件
-        fragmentManager = getSupportFragmentManager();
 
 //        请求权限
         ActivityCompat.requestPermissions(Main_activity.this, new String[]{
@@ -90,16 +89,17 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
 
 //        沉浸式状态栏
         // 4.4及以上版本开启
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
             setTranslucentStatus(true);
+            SystemBarTintManager tintManager = new SystemBarTintManager(this);
+            tintManager.setStatusBarTintEnabled(true);
+            tintManager.setNavigationBarTintEnabled(true);
+
+            // 状态栏背景色
+            tintManager.setTintColor(getColor(R.color.colorAccent));
         }
 
-        SystemBarTintManager tintManager = new SystemBarTintManager(this);
-        tintManager.setStatusBarTintEnabled(true);
-        tintManager.setNavigationBarTintEnabled(true);
 
-        // 状态栏背景色
-        tintManager.setTintColor(getColor(R.color.colorAccent));
     }
 
     //    沉浸式状态栏
@@ -129,7 +129,7 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
 //                            删除自动保存的数据
                         SQLiteDatabase db = sqliteHelper.getWritableDatabase();//打开数据库
                         try {
-                            String sql = "deleteText from " + Constant.TABLE_NAME + " where " + Constant.ID + "=" + id + ";";
+                            String sql = "delete from " + Constant.TABLE_NAME + " where " + Constant.ID + "=" + id + ";";
                             Log.i("strsql", sql);
                             DbManager.execSQL(db, sql);
                             Log.i("execSQL", "删除数据成功");
@@ -151,7 +151,7 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
     }
 
     //删除图片文件并刷新ListView
-    public void deleteImage(final String filename){
+    public void deleteImage(final String filename) {
         new AlertDialog.Builder(this).setTitle("确认要删除吗？")
                 .setIcon(android.R.drawable.ic_dialog_info)
                 .setPositiveButton("确定", new DialogInterface.OnClickListener() {
@@ -230,21 +230,21 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
                 customPopwindow.dismiss();
                 break;
             case R.id.btn_sound:
-                Toast.makeText(this, "敬请期待", Toast.LENGTH_SHORT).show();
+                intent = new Intent(this, Record_activity.class);
+                startActivity(intent);
                 customPopwindow.dismiss();
                 break;
-            case R.id.bottom_btn_text:
+            case R.id.btn_text_navigation:
                 //切换到文字记事列表
                 initAdapter(1);
-                listView.setAdapter(textAdapter);
                 break;
-            case R.id.bottom_btn_paint:
+            case R.id.btn_paint_navigation:
                 //切换到图片记事列表
                 initAdapter(2);
-                listView.setAdapter(paintAdapter);
                 break;
-            case R.id.bottom_btn_record:
+            case R.id.btn_record_navigation:
                 //切换到录音记事列表
+                initAdapter(3);
                 break;
         }
     }
@@ -256,17 +256,24 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
 //        实例化控件
         listView = (ListView) findViewById(R.id.itemlist);
         FAB_new_one = (FloatingActionButton) findViewById(R.id.btn_newone);
+        btnTextNavigation = (LinearLayout) findViewById(R.id.btn_text_navigation);
+        imageText = (ImageView) findViewById(R.id.image_text);
         bottomBtnText = (TextView) findViewById(R.id.bottom_btn_text);
+        btnPaintNavigation = (LinearLayout) findViewById(R.id.btn_paint_navigation);
+        imagePaint = (ImageView) findViewById(R.id.image_paint);
         bottomBtnPaint = (TextView) findViewById(R.id.bottom_btn_paint);
+        btnRecordNavigation = (LinearLayout) findViewById(R.id.btn_record_navigation);
+        imageRecord = (ImageView) findViewById(R.id.image_record);
         bottomBtnRecord = (TextView) findViewById(R.id.bottom_btn_record);
+
 
         initAdapter(1);
 
         //        点击监听
         FAB_new_one.setOnClickListener(this);
-        bottomBtnText.setOnClickListener(this);
-        bottomBtnPaint.setOnClickListener(this);
-        bottomBtnRecord.setOnClickListener(this);
+        btnTextNavigation.setOnClickListener(this);
+        btnPaintNavigation.setOnClickListener(this);
+        btnRecordNavigation.setOnClickListener(this);
     }
 
     @Override
@@ -274,38 +281,39 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
         super.onResume();
         sqliteHelper = DbManager.getIntance(this);
         initView();
-        initAdapter(1);
+        initAdapter(AppData.getFinalPage());
     }
 
     /**
      * 初始化Adapter
      */
     private void initAdapter(int i) {
+        initNavigation(i);
         switch (i) {
             case 1:
 //                初始化文字适配器
-                    listText = new ArrayList<>();
-                    //查询数据
-                    SQLiteDatabase db = sqliteHelper.getWritableDatabase();
-                    Log.i("execSQL", "db实例化完成");
-                    Cursor cursor = null;
-                    String sql = "select * from " + Constant.TABLE_NAME + " order by " + Constant.TIME + " desc;";
-                    Log.i("strsql", sql);
-                    cursor = DbManager.selectDataBySql(db, sql, null);
-                    if (cursor != null) {
-                        Log.i("cursor", "cursor不为空");
-                        while (cursor.moveToNext()) {
-                            Text_Entity text_entity = new Text_Entity();
-                            text_entity.setId(cursor.getString(cursor.getColumnIndex("id")));
-                            text_entity.setTime(cursor.getString(cursor.getColumnIndex("time")));
-                            text_entity.setSubstance(cursor.getString(cursor.getColumnIndex("substance")));
-                            listText.add(text_entity);
-                        }
+                listText = new ArrayList<>();
+                //查询数据
+                SQLiteDatabase db = sqliteHelper.getWritableDatabase();
+                Log.i("execSQL", "db实例化完成");
+                Cursor cursor = null;
+                String sql = "select * from " + Constant.TABLE_NAME + " order by " + Constant.TIME + " desc;";
+                Log.i("strsql", sql);
+                cursor = DbManager.selectDataBySql(db, sql, null);
+                if (cursor != null) {
+                    Log.i("cursor", "cursor不为空");
+                    while (cursor.moveToNext()) {
+                        Text_Entity text_entity = new Text_Entity();
+                        text_entity.setId(cursor.getString(cursor.getColumnIndex("id")));
+                        text_entity.setTime(cursor.getString(cursor.getColumnIndex("time")));
+                        text_entity.setSubstance(cursor.getString(cursor.getColumnIndex("substance")));
+                        listText.add(text_entity);
                     }
-                    db.close();//关闭数据库
-                    Log.i("execSQL", "数据库已关闭");
-                    textAdapter = new Text_Adapter(this, listText);
-                    listView.setAdapter(textAdapter);
+                }
+                db.close();//关闭数据库
+                Log.i("execSQL", "数据库已关闭");
+                textAdapter = new Text_Adapter(this, listText);
+                listView.setAdapter(textAdapter);
 
                 //    item点击事件
                 listView.setOnItemClickListener((new AdapterView.OnItemClickListener() {
@@ -331,13 +339,13 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
                         return true;
                     }
                 }));
-
+                listView.setAdapter(textAdapter);
                 break;
             case 2:
                 //初始化图片适配器
-                    listPaint = new ArrayList<>();
-                    getImage(listPaint);
-                    paintAdapter = new Paint_Adapter(this, listPaint);
+                listPaint = new ArrayList<>();
+                getImage(listPaint);
+                paintAdapter = new Paint_Adapter(this, listPaint);
 
                 //    item点击事件
                 listView.setOnItemClickListener((new AdapterView.OnItemClickListener() {
@@ -362,10 +370,38 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
                         return true;
                     }
                 }));
+                listView.setAdapter(paintAdapter);
                 break;
             case 3:
                 //初始化录音适配器
+                listRecord = new ArrayList<>();
+                getRecord(listRecord);
+                recordAdapter = new Record_Adapter(this, listRecord);
 
+                //    item点击事件
+                listView.setOnItemClickListener((new AdapterView.OnItemClickListener() {
+
+                            @Override
+                            public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
+                                                    long arg3) {
+                                // TODO Auto-generated method stub);
+//                                Intent intent = new Intent(Main_activity.this, Painter_activity.class);
+//                                intent.putExtra("fileName", listRecord.get(arg2).getFilename());//将被点击的item文件名传递到新活动
+//                                startActivity(intent);
+                            }
+                        })
+                );
+//        item长按事件
+                listView.setOnItemLongClickListener((new AdapterView.OnItemLongClickListener() {
+
+                    @Override
+                    public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2,
+                                                   long arg3) {
+//                        showDeleteImageDia(listRecord.get(arg2).getFilename());
+                        return true;
+                    }
+                }));
+                listView.setAdapter(recordAdapter);
                 break;
         }
 
@@ -377,11 +413,14 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
         super.onRestart();
         sqliteHelper = DbManager.getIntance(this);
         initView();
-        initAdapter(1);
+        initAdapter(AppData.getFinalPage());
     }
 
     private void getImage(List<Paint_Entity> list) {
         File file = new File(AppData.getImageFilePath());
+        if (!file.exists()) {
+            file.mkdirs();
+        }
         File[] allfiles = file.listFiles();
         if (allfiles != null) {
             for (int i = 0; i < allfiles.length; i++) {
@@ -400,6 +439,55 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
                     }
                 }
             }
+        }
+    }
+
+    private void getRecord(List<Record_Entity> list) {
+        File file = new File(AppData.getRecordFilePath());
+        if (!file.exists()) {
+            file.mkdirs();
+        }
+        File[] allfiles = file.listFiles();
+        if (allfiles != null) {
+            for (int i = 0; i < allfiles.length; i++) {
+                File fi = allfiles[i];
+                if (fi.isFile()) {
+                    int idx = fi.getPath().lastIndexOf(".");
+                    if (idx <= 0) {
+                        continue;
+                    }
+                    String suffix = fi.getPath().substring(idx);
+                    if (suffix.toLowerCase().equals(".amr")) {
+                        Record_Entity record_entity = new Record_Entity();
+                        record_entity.setTime(fi.getName());
+                        record_entity.setFilename(fi.getPath());
+                        list.add(record_entity);
+                    }
+                }
+            }
+        }
+    }
+
+    private void initNavigation(int i) {
+        bottomBtnPaint.setTextColor(getResources().getColor(R.color.text_black));
+        bottomBtnText.setTextColor(getResources().getColor(R.color.text_black));
+        bottomBtnRecord.setTextColor(getResources().getColor(R.color.text_black));
+        imagePaint.setColorFilter(getResources().getColor(R.color.gray));
+        imageText.setColorFilter(getResources().getColor(R.color.gray));
+        imageRecord.setColorFilter(getResources().getColor(R.color.gray));
+        switch (i) {
+            case 1:
+                bottomBtnText.setTextColor(getResources().getColor(R.color.colorAccent));
+                imageText.setColorFilter(getResources().getColor(R.color.colorAccent));
+                break;
+            case 2:
+                bottomBtnPaint.setTextColor(getResources().getColor(R.color.colorAccent));
+                imagePaint.setColorFilter(getResources().getColor(R.color.colorAccent));
+                break;
+            case 3:
+                bottomBtnRecord.setTextColor(getResources().getColor(R.color.colorAccent));
+                imageRecord.setColorFilter(getResources().getColor(R.color.colorAccent));
+                break;
         }
     }
 

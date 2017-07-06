@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
@@ -27,6 +28,7 @@ import com.example.zero.memorandum.AppData;
 import com.example.zero.memorandum.custom.PaintView;
 
 import com.example.zero.memorandum.R;
+import com.readystatesoftware.systembartint.SystemBarTintManager;
 
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -66,6 +68,8 @@ public class Painter_activity extends Activity implements OnClickListener {
         setContentView(R.layout.paint_layout);
 
         initView();
+        AppData.setFinalPage(2);
+
         //        获取intent
         intent = getIntent();
         if (intent != null) {
@@ -78,13 +82,23 @@ public class Painter_activity extends Activity implements OnClickListener {
             } else {
                 initData(null);
                 //获得系统当前时间，并以该时间作为文件名
-                SimpleDateFormat formatter = new SimpleDateFormat("yyyy:MM:dd:HH:mm:ss");
+                SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
                 Date curDate = new Date(System.currentTimeMillis());//获取当前时间
-                fileName = AppData.getImageFilePath()+"paint" + formatter.format(curDate) + ".png";
+                fileName = AppData.getImageFilePath() + "paint" + formatter.format(curDate) + ".png";
             }
         }
 
-        setTranslucentStatus(true);
+        //        沉浸式状态栏
+        // 4.4以上版本开启
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
+            setTranslucentStatus(true);
+            SystemBarTintManager tintManager = new SystemBarTintManager(this);
+            tintManager.setStatusBarTintEnabled(true);
+            tintManager.setNavigationBarTintEnabled(true);
+
+            // 状态栏背景色
+            tintManager.setTintColor(getColor(R.color.colorAccent));
+        }
     }
 
     @Override
@@ -101,7 +115,8 @@ public class Painter_activity extends Activity implements OnClickListener {
         paint_linear.addView(paintViewPad);
         paintViewPad.requestFocus();
         sp = getSharedPreferences("config", Context.MODE_PRIVATE);
-        AppData.setPenColor(sp.getInt("pencolor", 0xff0000));
+        AppData.setPenColor(sp.getInt("pencolor", -65536));
+        Log.i("---PenColor---",""+sp.getInt("pencolor", 0xff0000));
         AppData.setPenSize(sp.getInt("pensize", 9));
         paintColorList = Arrays.asList(getResources().getStringArray(R.array.paintcolor));
         paintViewPad.selectPaintColor(AppData.getPenColor());
@@ -186,7 +201,7 @@ public class Painter_activity extends Activity implements OnClickListener {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        AppData.setPenColor(data.getIntExtra("color",0xff0000));
+        AppData.setPenColor(data.getIntExtra("color", 0xff0000));
         paintViewPad.selectPaintColor(AppData.getPenColor());
         Log.i("---onActivityResult---", "" + AppData.getPenColor());
     }
