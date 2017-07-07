@@ -7,6 +7,7 @@ import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioRecord;
 import android.media.AudioTrack;
+import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -44,7 +45,6 @@ public class Record_activity extends Activity implements View.OnClickListener {
     private ImageButton btnRecord;
 
     File file;
-    private String iTempFileNameString = "recordtemp_";
     private File iRecAudioFile;
     private File iRecAudioDir;
     private String fileName = null;
@@ -70,13 +70,10 @@ public class Record_activity extends Activity implements View.OnClickListener {
             file.mkdirs();
         }
 
-//        生成临时目录
-        iRecAudioDir = Environment.getExternalStorageDirectory();
-
         //获得系统当前时间，并以该时间作为文件名
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
         Date curDate = new Date(System.currentTimeMillis());//获取当前时间
-        fileName = AppData.getRecordFilePath() + "record" + formatter.format(curDate) + ".amr";
+        fileName = AppData.getRecordFilePath() + "record" + formatter.format(curDate) + ".aac";
         file = new File(fileName);
     }
 
@@ -99,8 +96,6 @@ public class Record_activity extends Activity implements View.OnClickListener {
                     btnRecord.setImageResource(R.mipmap.btn_recorder);
                     isRecording = false;
                     stopRecord();
-                    copyFile(iRecAudioFile.getPath(), fileName);//复制临时文件到指定目录
-                    iRecAudioFile.delete();//删除临时文件
                     finish();
                 } else {
 //                    开始录制
@@ -113,41 +108,13 @@ public class Record_activity extends Activity implements View.OnClickListener {
         }
     }
 
-    /**
-     * 复制单个文件
-     *
-     * @param oldPath String 原文件路径 如：c:/fqf.txt
-     * @param newPath String 复制后路径 如：f:/fqf.txt
-     * @return boolean
-     */
-    public void copyFile(String oldPath, String newPath) {
-        try {
-            int bytesum = 0;
-            int byteread = 0;
-            File oldfile = new File(oldPath);
-            if (oldfile.exists()) { //文件存在时
-                InputStream inStream = new FileInputStream(oldPath); //读入原文件
-                FileOutputStream fs = new FileOutputStream(newPath);
-                byte[] buffer = new byte[1444];
-                while ((byteread = inStream.read(buffer)) != -1) {
-                    bytesum += byteread; //字节数 文件大小
-                    System.out.println(bytesum);
-                    fs.write(buffer, 0, byteread);
-                }
-                inStream.close();
-            }
-        } catch (Exception e) {
-            Log.i("---复制文件---", "复制单个文件操作出错");
-            e.printStackTrace();
-        }
-
-    }
 
     private void stopRecord() {
         if (file != null) {
               /* 停止录音 */
             try {
                 iMediaRecorder.stop();
+                iMediaRecorder.reset();
                 iMediaRecorder.release();
                 iMediaRecorder = null;
             } catch (IllegalStateException e) {
@@ -155,28 +122,21 @@ public class Record_activity extends Activity implements View.OnClickListener {
             }
         }
     }
-
     private void startRecord() {
          /* 创建录音文件 */
-            try {
-                iRecAudioFile = File.createTempFile(iTempFileNameString,
-                        ".amr", iRecAudioDir);
-                iMediaRecorder = new MediaRecorder();
+        try {
+            iMediaRecorder = new MediaRecorder();
             /* 设置录音来源为MIC */
-                iMediaRecorder
-                        .setAudioSource(MediaRecorder.AudioSource.MIC);
-                iMediaRecorder
-                        .setOutputFormat(MediaRecorder.OutputFormat.DEFAULT);
-                iMediaRecorder
-                        .setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
+            iMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+            iMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.AAC_ADTS);
+            iMediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+            iMediaRecorder.setOutputFile(fileName);
 
-                iMediaRecorder.setOutputFile(file
-                        .getAbsolutePath());
-                iMediaRecorder.prepare();
-                iMediaRecorder.start();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            iMediaRecorder.prepare();
+            iMediaRecorder.start();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
+    }
 }
 

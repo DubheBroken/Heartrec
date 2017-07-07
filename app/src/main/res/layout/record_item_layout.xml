@@ -3,6 +3,7 @@
     android:layout_height="match_parent"
     android:layout_width="match_parent"
     android:orientation="vertical"
+    android:descendantFocusability="blocksDescendants"
     >
 
         <LinearLayout
@@ -17,6 +18,7 @@
             >
 
                 <TextView
+                    android:focusable="false"
                     android:layout_weight="0"
                     android:layout_marginTop="8dp"
                     android:layout_marginEnd="16dp"
@@ -30,7 +32,8 @@
                     android:textSize="10sp"
                     />
 
-                <SeekBar
+                <com.example.zero.memorandum.custom.MySeekBar
+                    android:focusable="false"
                     android:id="@+id/seekbar_progress"
                     android:layout_weight="1"
                     android:layout_width="match_parent"
@@ -39,6 +42,7 @@
                     />
 
                 <TextView
+                    android:focusable="false"
                     android:layout_marginEnd="8dp"
                     android:id="@+id/record_item_play"
                     android:contentDescription="展开"

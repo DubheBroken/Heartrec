@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -22,6 +23,7 @@ import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.example.zero.memorandum.AppData;
@@ -35,6 +37,7 @@ import com.example.zero.memorandum.utils.Constant;
 import com.example.zero.memorandum.utils.DbManager;
 import com.example.zero.memorandum.adapter.Text_Adapter;
 import com.example.zero.memorandum.entity.Text_Entity;
+import com.example.zero.memorandum.utils.Player;
 import com.example.zero.memorandum.utils.SqliteHelper;
 import com.readystatesoftware.systembartint.SystemBarTintManager;
 
@@ -51,6 +54,7 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
     private List<Text_Entity> listText;
     private List<Paint_Entity> listPaint;
     private List<Record_Entity> listRecord;
+    private Player player;
 
     private ListView listView;
     private Text_Adapter textAdapter;
@@ -179,6 +183,34 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
                 }).show();
     }
 
+    //删除图片文件并刷新ListView
+    public void deleteRecord(final String filename) {
+        new AlertDialog.Builder(this).setTitle("确认要删除吗？")
+                .setIcon(android.R.drawable.ic_dialog_info)
+                .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // 点击“确认”后的操作
+                        File file = new File(filename);
+                        try {
+                            file.delete();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        initView();
+                        initAdapter(3);
+                    }
+                })
+                .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // 点击“返回”后的操作,这里不设置没有任何操作
+                    }
+                }).show();
+    }
+
     //    右键菜单
     private void showDeleteTextDia(final String id) {
         AlertDialog.Builder multiDia = new AlertDialog.Builder(Main_activity.this);
@@ -204,6 +236,21 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
             public void onClick(DialogInterface dialog, int which) {
                 // TODO Auto-generated method stub
                 deleteImage(filename);
+            }
+        });
+        multiDia.create().show();
+    }
+
+    //    右键菜单
+    private void showDeleteRecordDia(final String filename) {
+        AlertDialog.Builder multiDia = new AlertDialog.Builder(Main_activity.this);
+        multiDia.setTitle("选择操作");
+        multiDia.setPositiveButton("删除", new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // TODO Auto-generated method stub
+                deleteRecord(filename);
             }
         });
         multiDia.create().show();
@@ -385,11 +432,40 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
                             public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
                                                     long arg3) {
                                 // TODO Auto-generated method stub);
-//                                Intent intent = new Intent(Main_activity.this, Painter_activity.class);
-//                                intent.putExtra("fileName", listRecord.get(arg2).getFilename());//将被点击的item文件名传递到新活动
-//                                startActivity(intent);
+                                View view1 = listView.getChildAt(arg2);
+                                final Record_Adapter.ViewHolder viewHolder = (Record_Adapter.ViewHolder) view1.getTag();
+                                if (player == null)
+                                    player = new Player(Main_activity.this, listRecord.get(arg2).getFilename());
+                                if (player.isPlaying) {
+                                    player.stop();
+                                    viewHolder.image.setBackgroundResource(R.drawable.btn_play);
+                                } else {
+                                    player.start();
+                                    viewHolder.image.setBackgroundResource(R.drawable.btn_pause);
+                                    updateSeekBar(player, viewHolder.seekBar);
+                                }
+                                viewHolder.seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                                    @Override
+                                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                                        if (seekBar.getProgress() == seekBar.getMax()) {
+                                            viewHolder.image.setBackgroundResource(R.drawable.btn_play);
+                                        }
+                                    }
+
+                                    @Override
+                                    public void onStartTrackingTouch(SeekBar seekBar) {
+
+                                    }
+
+                                    @Override
+                                    public void onStopTrackingTouch(SeekBar seekBar) {
+
+                                    }
+                                });
                             }
                         })
+
+
                 );
 //        item长按事件
                 listView.setOnItemLongClickListener((new AdapterView.OnItemLongClickListener() {
@@ -397,7 +473,7 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
                     @Override
                     public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2,
                                                    long arg3) {
-//                        showDeleteImageDia(listRecord.get(arg2).getFilename());
+                        showDeleteRecordDia(listRecord.get(arg2).getFilename());
                         return true;
                     }
                 }));
@@ -406,6 +482,40 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
         }
 
 
+    }
+
+    //同步seekbar与进度条时间
+    private void updateSeekBar(final Player player, final SeekBar sb) {
+        new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    if (player != null) {
+                        int mCurrentPosition = player.getCurrentPosition() / 1000;//获取player当前进度，毫秒表示
+                        int total = player.getDuration() / 1000;//获取当前歌曲总时长
+                        sb.setProgress(mCurrentPosition);//seekbar同步歌曲进度
+                        sb.setMax(total);//seekbar设置总时长
+                        Log.i("---播放进度---",""+mCurrentPosition);
+                        Log.i("---总长度---",""+total);
+//                    tv_total.setText(calculateTime(total));
+//                    tv_current.setText(calculateTime(mCurrentPosition));
+                    }
+                }
+        }).start();
+    }
+
+    //计算歌曲时间
+    private String calculateTime(int time) {
+        int minute;
+        int second;
+        if (time >= 60) {
+            minute = time / 60;
+            second = time % 60;
+            return minute + ":" + second;
+        } else if (time < 60) {
+            second = time;
+            return "0:" + second;
+        }
+        return null;
     }
 
     @Override
@@ -457,7 +567,7 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
                         continue;
                     }
                     String suffix = fi.getPath().substring(idx);
-                    if (suffix.toLowerCase().equals(".amr")) {
+                    if (suffix.toLowerCase().equals(".aac")) {
                         Record_Entity record_entity = new Record_Entity();
                         record_entity.setTime(fi.getName());
                         record_entity.setFilename(fi.getPath());

@@ -15,6 +15,7 @@ import android.widget.TextView;
 import com.example.zero.memorandum.R;
 import com.example.zero.memorandum.activity.Main_activity;
 import com.example.zero.memorandum.activity.Record_activity;
+import com.example.zero.memorandum.custom.MySeekBar;
 import com.example.zero.memorandum.entity.Paint_Entity;
 import com.example.zero.memorandum.entity.Record_Entity;
 
@@ -62,7 +63,7 @@ public class Record_Adapter extends BaseAdapter {
             holder.layout = (LinearLayout) view.findViewById(R.id.record_layout_item);
             holder.time = (TextView) view.findViewById(R.id.record_item_time);
             holder.image = (TextView) view.findViewById(R.id.record_item_play);
-            holder.seekBar = (SeekBar) view.findViewById(R.id.seekbar_progress);
+            holder.seekBar = (MySeekBar) view.findViewById(R.id.seekbar_progress);
 
             view.setTag(holder);
         } else {
@@ -82,41 +83,14 @@ public class Record_Adapter extends BaseAdapter {
         holder.time.setText(time);
 
         final ViewHolder finalHolder = holder;
-        final LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) finalHolder.image.getLayoutParams();
-        final int width = params.width;
-        final int height = params.height;
-        holder.image.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                switch (v.getId()) {
-                    case R.id.paint_item_imgbtn_arrow:
-//                        v.startAnimation(AnimationUtils.loadAnimation(context,R.anim.rotate90));//旋转动画，时间不同步弃用
-//                        switch (v.getBackground().getLevel()) {
-//                            case 0:
-//                                v.getBackground().setLevel(1);
-//                                params.width = ViewGroup.LayoutParams.WRAP_CONTENT;
-//                                params.height = ViewGroup.LayoutParams.WRAP_CONTENT;
-//                                finalHolder.image.setLayoutParams(params);
-//                                break;
-//                            case 1:
-//                                v.getBackground().setLevel(0);
-//                                params.width = width;
-//                                params.height = height;
-//                                finalHolder.image.setLayoutParams(params);
-//                                break;
-//                        }
-                        break;
-                }
-            }
-        });
         return view;
     }
 
-    private class ViewHolder {
-        LinearLayout layout;
-        TextView time;//时间
-        TextView image;//播放按钮
-        SeekBar seekBar;//进度条
+    public class ViewHolder {
+        public LinearLayout layout;
+        public TextView time;//时间
+        public TextView image;//播放按钮
+        public MySeekBar seekBar;//进度条
     }
 
     /**
