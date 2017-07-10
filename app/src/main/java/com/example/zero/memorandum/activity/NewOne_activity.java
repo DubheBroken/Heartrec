@@ -195,7 +195,7 @@ public class NewOne_activity extends Activity implements OnClickListener {
             SQLiteDatabase db = sqliteHelper.getWritableDatabase();
             Log.i("execSQL", "db实例化完成");
             Cursor cursor = null;
-            String sql = "select * from " + Constant.TABLE_NAME + " order by " + Constant.TIME + " desc where " + Constant.ID + "=" + id + ";";
+            String sql = "select * from " + Constant.TABLE_NAME + " where " + Constant.ID + "=" + id + ";";
             Log.i("strsql", sql);
             cursor = DbManager.selectDataBySql(db, sql, null);
             if (cursor != null) {

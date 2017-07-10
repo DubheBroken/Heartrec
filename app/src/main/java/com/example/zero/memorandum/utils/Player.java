@@ -18,6 +18,7 @@ public class Player extends MediaPlayer {
     private String path;
     public boolean isPlaying = false;
     private Context context;
+    private String uri;
 
 
     public Player(Context context, String path) {
@@ -30,7 +31,8 @@ public class Player extends MediaPlayer {
             try {
                 isPlaying = true;
                 //设置要播放的文件
-                File file = new File("/mnt/" + path);
+                uri = "/mnt/" + path;
+                File file = new File(uri);
                 FileInputStream fis = new FileInputStream(file);
                 super.setDataSource(fis.getFD());
                 super.prepare();
@@ -40,6 +42,10 @@ public class Player extends MediaPlayer {
                 e.printStackTrace();
             }
         }
+    }
+
+    public String getUri() {
+        return this.uri;
     }
 
     public void stop() {

@@ -1,6 +1,7 @@
 package com.example.zero.memorandum.adapter;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.icu.text.AlphabeticIndex;
 import android.net.Uri;
 import android.util.Log;
@@ -63,7 +64,6 @@ public class Record_Adapter extends BaseAdapter {
             holder.layout = (LinearLayout) view.findViewById(R.id.record_layout_item);
             holder.time = (TextView) view.findViewById(R.id.record_item_time);
             holder.image = (TextView) view.findViewById(R.id.record_item_play);
-            holder.seekBar = (MySeekBar) view.findViewById(R.id.seekbar_progress);
 
             view.setTag(holder);
         } else {
@@ -88,9 +88,8 @@ public class Record_Adapter extends BaseAdapter {
 
     public class ViewHolder {
         public LinearLayout layout;
-        public TextView time;//时间
+        public TextView time;//总时间
         public TextView image;//播放按钮
-        public MySeekBar seekBar;//进度条
     }
 
     /**
@@ -114,6 +113,8 @@ public class Record_Adapter extends BaseAdapter {
         }
         return sdf2.format(d);
     }
+
+
 }
 
 

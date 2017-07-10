@@ -3,12 +3,15 @@ package com.example.zero.memorandum.activity;
 import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
+import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
@@ -44,6 +47,8 @@ import com.readystatesoftware.systembartint.SystemBarTintManager;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Created by Zero on 2017/2/15.
@@ -55,6 +60,13 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
     private List<Paint_Entity> listPaint;
     private List<Record_Entity> listRecord;
     private Player player;
+
+    private ContentResolver mResolver;
+
+    private Runnable switchRunnable, loopRunnable, toNormalRunnable;
+    private Thread switchThread, loopThread, toNormalThread;
+    private ExecutorService cacheThreadPool;
+    private boolean running = true;
 
     private ListView listView;
     private Text_Adapter textAdapter;
@@ -313,7 +325,9 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
         imageRecord = (ImageView) findViewById(R.id.image_record);
         bottomBtnRecord = (TextView) findViewById(R.id.bottom_btn_record);
 
+        mResolver = getContentResolver();
 
+        cacheThreadPool = Executors.newCachedThreadPool();
         initAdapter(1);
 
         //        点击监听
@@ -434,34 +448,54 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
                                 // TODO Auto-generated method stub);
                                 View view1 = listView.getChildAt(arg2);
                                 final Record_Adapter.ViewHolder viewHolder = (Record_Adapter.ViewHolder) view1.getTag();
-                                if (player == null)
+                                if (player != null && player.isPlaying) {
+                                    player.stop();
+                                    player = null;
+                                    loopThread.interrupt();
+                                    running = false;
+                                    viewHolder.image.setBackgroundResource(R.drawable.btn_play);
+                                    viewHolder.time.setBackgroundResource(R.drawable.bg_player_normal);
+
                                     player = new Player(Main_activity.this, listRecord.get(arg2).getFilename());
+                                    player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                                        @Override
+                                        public void onCompletion(MediaPlayer mp) {
+                                            player = null;
+                                            loopThread.interrupt();
+                                            running = false;
+                                            viewHolder.image.setBackgroundResource(R.drawable.btn_play);
+                                            viewHolder.time.setBackgroundResource(R.drawable.bg_player_normal);
+                                        }
+                                    });
+                                }
+                                if (player == null) {
+                                    player = new Player(Main_activity.this, listRecord.get(arg2).getFilename());
+                                    player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                                        @Override
+                                        public void onCompletion(MediaPlayer mp) {
+                                            player = null;
+                                            loopThread.interrupt();
+                                            running = false;
+                                            viewHolder.image.setBackgroundResource(R.drawable.btn_play);
+                                            viewHolder.time.setBackgroundResource(R.drawable.bg_player_normal);
+                                        }
+                                    });
+                                }
                                 if (player.isPlaying) {
                                     player.stop();
+                                    player = null;
+                                    loopThread.interrupt();
+                                    running = false;
                                     viewHolder.image.setBackgroundResource(R.drawable.btn_play);
+                                    viewHolder.time.setBackgroundResource(R.drawable.bg_player_normal);
                                 } else {
                                     player.start();
                                     viewHolder.image.setBackgroundResource(R.drawable.btn_pause);
-                                    updateSeekBar(player, viewHolder.seekBar);
+                                    running = true;
+                                    updateSeekBar(viewHolder.time);
                                 }
-                                viewHolder.seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                                    @Override
-                                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                                        if (seekBar.getProgress() == seekBar.getMax()) {
-                                            viewHolder.image.setBackgroundResource(R.drawable.btn_play);
-                                        }
-                                    }
 
-                                    @Override
-                                    public void onStartTrackingTouch(SeekBar seekBar) {
 
-                                    }
-
-                                    @Override
-                                    public void onStopTrackingTouch(SeekBar seekBar) {
-
-                                    }
-                                });
                             }
                         })
 
@@ -484,23 +518,96 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
 
     }
 
+    private String getFileName(String string) {
+        String[] str = string.split("/");
+        return str[str.length - 1];
+    }
+
     //同步seekbar与进度条时间
-    private void updateSeekBar(final Player player, final SeekBar sb) {
-        new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    if (player != null) {
-                        int mCurrentPosition = player.getCurrentPosition() / 1000;//获取player当前进度，毫秒表示
-                        int total = player.getDuration() / 1000;//获取当前歌曲总时长
-                        sb.setProgress(mCurrentPosition);//seekbar同步歌曲进度
-                        sb.setMax(total);//seekbar设置总时长
-                        Log.i("---播放进度---",""+mCurrentPosition);
-                        Log.i("---总长度---",""+total);
-//                    tv_total.setText(calculateTime(total));
-//                    tv_current.setText(calculateTime(mCurrentPosition));
+    private void updateSeekBar(final TextView textView) {
+        loopRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (running) {
+                    try {
+                        displayAnim(textView, true);
+                        Thread.sleep(200);
+                        displayAnim(textView, false);
+                        Thread.sleep(200);
+                        updateSeekBar(textView);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
                     }
                 }
-        }).start();
+            }
+        };
+        loopThread = new Thread(loopRunnable);
+        cacheThreadPool.execute(loopThread);
+    }
+
+    private void displayAnim(TextView textView, boolean bool) {
+        if (player != null && !player.equals(null)) {
+            if (bool) {
+                for (int i = 1; i <= 5; i++) {
+                    updateProgress(textView, i);
+                }
+            } else {
+                for (int i = 5; i > 0; i--) {
+                    updateProgress(textView, i);
+                }
+            }
+        }
+    }
+
+    private void updateProgress(final TextView textView, final int type) {
+        if (player != null && !player.equals(null) && player.isPlaying) {
+            switchRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    if (running) {
+                        switch (type) {
+                            case 1:
+                                textView.setBackgroundResource(R.drawable.bg_player_level1);
+                                Log.i("---updateProgress---", "切换到1" + Thread.currentThread().getName());
+                                break;
+                            case 2:
+                                textView.setBackgroundResource(R.drawable.bg_player_level2);
+                                Log.i("---updateProgress---", "切换到2" + Thread.currentThread().getName());
+                                break;
+                            case 3:
+                                textView.setBackgroundResource(R.drawable.bg_player_level3);
+                                Log.i("---updateProgress---", "切换到3" + Thread.currentThread().getName());
+                                break;
+                            case 4:
+                                textView.setBackgroundResource(R.drawable.bg_player_level4);
+                                Log.i("---updateProgress---", "切换到4" + Thread.currentThread().getName());
+                                break;
+                            case 5:
+                                textView.setBackgroundResource(R.drawable.bg_player_level5);
+                                Log.i("---updateProgress---", "切换到5" + Thread.currentThread().getName());
+                                break;
+                        }
+                    }
+                }
+            };
+            runOnUiThread(switchRunnable);
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        } else {
+            toNormalRunnable = new Runnable() {
+                @Override
+                public void run() {
+                    if (running) {
+                        textView.setBackgroundResource(R.drawable.bg_player_normal);
+                    }
+                }
+            };
+            runOnUiThread(toNormalRunnable);
+            Log.i("---updateProgress---", "切换到默认");
+        }
     }
 
     //计算歌曲时间
@@ -510,10 +617,10 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
         if (time >= 60) {
             minute = time / 60;
             second = time % 60;
-            return minute + ":" + second;
+            return minute + "'" + second + "\"";
         } else if (time < 60) {
             second = time;
-            return "0:" + second;
+            return second + "\"";
         }
         return null;
     }
