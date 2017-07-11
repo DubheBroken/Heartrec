@@ -540,11 +540,14 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
                             }
 
                         }
-                        displayAnim(viewHolderList.get(playingItem).time, true);
+                        if (playingItem >= 0)
+                            displayAnim(viewHolderList.get(playingItem).time, true);
                         Thread.sleep(200);
-                        displayAnim(viewHolderList.get(playingItem).time, false);
+                        if (playingItem >= 0)
+                            displayAnim(viewHolderList.get(playingItem).time, false);
                         Thread.sleep(200);
                         updateSeekBar();
+
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
