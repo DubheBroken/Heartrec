@@ -6,43 +6,31 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:fitsSystemWindows="true"
-    android:clipToPadding="false">
-
-    <SearchView
-        android:layout_weight="0"
-        android:id="@+id/searchview1"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-
-    </SearchView>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="3dp"
-        android:background="@drawable/line_top"
-        />
+    android:clipToPadding="false"
+    >
 
      <ListView
+         android:layout_marginTop="8dp"
          android:id="@+id/itemlist"
          android:layout_marginLeft="8dp"
          android:layout_marginRight="8dp"
          android:layout_weight="1"
          android:layout_width="match_parent"
-         android:layout_height="match_parent"
+         android:layout_height="0dp"
          android:scrollbars="none"
          >
 
      </ListView>
 
     <android.support.design.widget.FloatingActionButton
-        android:layout_marginTop="-78dp"
+        android:layout_marginTop="-88dp"
         android:id="@+id/btn_newone"
-        android:layout_height="56dp"
-        android:layout_width="56dp"
+        android:layout_height="@dimen/FloatingActionButton_size"
+        android:layout_width="@dimen/FloatingActionButton_size"
         android:src="@drawable/btn_new_one"
         android:layout_gravity="right"
-        android:layout_marginRight="30dp"
-        android:layout_marginBottom="30dp"
+        android:layout_marginRight="@dimen/FloatingActionButton_margin"
+        android:layout_marginBottom="@dimen/FloatingActionButton_margin"
         app:elevation="4dp"
         app:rippleColor="@color/colorAccent"
         app:pressedTranslationZ="8dp"
@@ -57,6 +45,7 @@
         android:background="@drawable/line_bottom"/>
 
     <fragment
+        android:layout_marginBottom="@dimen/bottomFragment_marginBottom"
         android:id="@+id/fragment_navigation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

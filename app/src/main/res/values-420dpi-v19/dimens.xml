@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="tools_margin">9dp</dimen>
+    <dimen name="text_paintsize_marginTop">56dp</dimen>
+    <dimen name="paint_size_marginTop">64dp</dimen>
+    <dimen name="painter_line_marginTop">98dp</dimen>
+    <dimen name="painter_marginTop">101dp</dimen>
+    <dimen name="textsize_paintsize">10sp</dimen>
+    <dimen name="FloatingActionButton_margin">24dp</dimen>
+    <dimen name="FloatingActionButton_size">64dp</dimen>
+    <dimen name="bottomButton_size">64dp</dimen>
+    <dimen name="bottomText_size">13sp</dimen>
+    <dimen name="bottomFragment_marginBottom">4dp</dimen>
+    <dimen name="popwindow_marginBottom">-600px</dimen>
+    <dimen name="popwindow_marginRight">20px</dimen>
+    <dimen name="dialog_height">480px</dimen>
+    <dimen name="colorButton_margin">40dp</dimen>
+    <dimen name="colorButton_marginFirst">48dp</dimen>
+    <dimen name="colorPicker_marginTop">102dp</dimen>
+    <dimen name="dialog_verticalMargin">0px</dimen>
+</resources>

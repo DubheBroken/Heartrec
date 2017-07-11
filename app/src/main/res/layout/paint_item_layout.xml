@@ -32,7 +32,7 @@
                     android:layout_width="match_parent"
                     android:text="@string/time"
                     android:textColor="@color/meantext"
-                    android:textSize="10sp"/>
+                    android:textSize="@dimen/textsize_paintsize"/>
 
                 <TextView
                     android:id="@+id/paint_item_imgbtn_arrow"

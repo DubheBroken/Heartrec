@@ -18,6 +18,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.zero.memorandum.AppData;
 import com.example.zero.memorandum.R;
@@ -117,7 +118,7 @@ public class Record_activity extends Activity implements View.OnClickListener {
                 iMediaRecorder.reset();
                 iMediaRecorder.release();
                 iMediaRecorder = null;
-            } catch (IllegalStateException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
@@ -136,6 +137,11 @@ public class Record_activity extends Activity implements View.OnClickListener {
             iMediaRecorder.start();
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (RuntimeException e){
+            e.printStackTrace();
+            File file = new File(fileName);
+            file.delete();
+            Toast.makeText(this,"无法使用麦克风，请检查设备状态后重试",Toast.LENGTH_LONG).show();
         }
     }
 }

@@ -13,8 +13,10 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.Display;
+import android.view.Gravity;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
@@ -116,7 +118,7 @@ public class Painter_activity extends Activity implements OnClickListener {
         paintViewPad.requestFocus();
         sp = getSharedPreferences("config", Context.MODE_PRIVATE);
         AppData.setPenColor(sp.getInt("pencolor", -65536));
-        Log.i("---PenColor---",""+sp.getInt("pencolor", 0xff0000));
+        Log.i("---PenColor---", "" + sp.getInt("pencolor", 0xff0000));
         AppData.setPenSize(sp.getInt("pensize", 9));
         paintColorList = Arrays.asList(getResources().getStringArray(R.array.paintcolor));
         paintViewPad.selectPaintColor(AppData.getPenColor());
@@ -237,12 +239,13 @@ public class Painter_activity extends Activity implements OnClickListener {
         WindowManager.LayoutParams params =
                 dialog.getWindow().getAttributes();
         params.width = WindowManager.LayoutParams.WRAP_CONTENT;
-        params.height = 480;
+        params.height = (int) getResources().getDimension(R.dimen.dialog_height);
+        params.verticalMargin = getResources().getDimension(R.dimen.dialog_verticalMargin);
         dialog.getWindow().setAttributes(params);
     }
 
     /**
-     * 显示画笔样式选项对话框
+     * 切换画笔和橡皮
      */
     public void changePenStyle() {
         btnPenStylePaint.getBackground().setLevel(select_paint_style_index);

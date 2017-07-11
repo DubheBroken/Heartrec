@@ -6,7 +6,7 @@
     android:orientation="vertical">
 
     <com.example.zero.memorandum.custom.ColorPickView
-        android:layout_marginTop="88dp"
+        android:layout_marginTop="@dimen/colorPicker_marginTop"
         android:layout_gravity="center"
         android:id="@+id/color_picker_view"
         android:layout_width="wrap_content"
@@ -34,7 +34,7 @@
 
             <RadioButton
                 android:id="@+id/radio_red"
-                android:layout_marginLeft="32dp"
+                android:layout_marginLeft="@dimen/colorButton_marginFirst"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:background="@color/red"
@@ -43,7 +43,7 @@
 
             <RadioButton
                 android:id="@+id/radio_orange"
-                android:layout_marginLeft="32dp"
+                android:layout_marginLeft="@dimen/colorButton_margin"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:background="@color/orange"
@@ -52,7 +52,7 @@
 
             <RadioButton
                 android:id="@+id/radio_yellow"
-                android:layout_marginLeft="32dp"
+                android:layout_marginLeft="@dimen/colorButton_margin"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:background="@color/yellow"
@@ -61,7 +61,7 @@
 
             <RadioButton
                 android:id="@+id/radio_green"
-                android:layout_marginLeft="32dp"
+                android:layout_marginLeft="@dimen/colorButton_margin"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:background="@color/green"
@@ -70,7 +70,7 @@
 
             <RadioButton
                 android:id="@+id/radio_bluegreen"
-                android:layout_marginLeft="32dp"
+                android:layout_marginLeft="@dimen/colorButton_margin"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:background="@color/bluegreen"
@@ -89,7 +89,7 @@
 
             <RadioButton
                 android:id="@+id/radio_blue"
-                android:layout_marginLeft="32dp"
+                android:layout_marginLeft="@dimen/colorButton_marginFirst"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:background="@color/blue"
@@ -98,7 +98,7 @@
 
             <RadioButton
                 android:id="@+id/radio_purple"
-                android:layout_marginLeft="32dp"
+                android:layout_marginLeft="@dimen/colorButton_margin"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:background="@color/purple"
@@ -107,7 +107,7 @@
 
             <RadioButton
                 android:id="@+id/radio_pink"
-                android:layout_marginLeft="32dp"
+                android:layout_marginLeft="@dimen/colorButton_margin"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:background="@color/pink"
@@ -116,7 +116,7 @@
 
             <RadioButton
                 android:id="@+id/radio_black"
-                android:layout_marginLeft="32dp"
+                android:layout_marginLeft="@dimen/colorButton_margin"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:background="@color/black"
@@ -125,7 +125,7 @@
 
             <RadioButton
                 android:id="@+id/radio_gray"
-                android:layout_marginLeft="32dp"
+                android:layout_marginLeft="@dimen/colorButton_margin"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:background="@color/gray"

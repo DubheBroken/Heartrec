@@ -5,6 +5,9 @@ import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.util.Log;
+import android.widget.Toast;
+
+import com.example.zero.memorandum.activity.Main_activity;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -29,7 +32,6 @@ public class Player extends MediaPlayer {
     public void start() {
         if (!isPlaying) {
             try {
-                isPlaying = true;
                 //设置要播放的文件
                 uri = "/mnt/" + path;
                 File file = new File(uri);
@@ -38,8 +40,10 @@ public class Player extends MediaPlayer {
                 super.prepare();
                 //播放
                 super.start();
+                isPlaying = true;
             } catch (Exception e) {
                 e.printStackTrace();
+                Toast.makeText(context,"播放失败，文件损坏",Toast.LENGTH_LONG).show();
             }
         }
     }

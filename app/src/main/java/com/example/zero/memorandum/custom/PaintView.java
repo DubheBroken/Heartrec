@@ -114,6 +114,7 @@ public class PaintView extends View {
             mPaint.setStrokeWidth(currentSize);
             mPaint.setColor(currentColor);
         } else {//橡皮擦
+            mPaint.setStrokeWidth(currentSize);
             mPaint.setAlpha(0);
             mPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_IN));
             mPaint.setColor(Color.TRANSPARENT);

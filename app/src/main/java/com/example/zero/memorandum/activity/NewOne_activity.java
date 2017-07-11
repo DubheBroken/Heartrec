@@ -255,7 +255,8 @@ public class NewOne_activity extends Activity implements OnClickListener {
         WindowManager.LayoutParams params =
                 dialog.getWindow().getAttributes();
         params.width = WindowManager.LayoutParams.WRAP_CONTENT;
-        params.height = 480;
+        params.height = (int) getResources().getDimension(R.dimen.dialog_height);
+        params.verticalMargin = getResources().getDimension(R.dimen.dialog_verticalMargin);
         dialog.getWindow().setAttributes(params);
     }
 

@@ -3,7 +3,6 @@ package com.example.zero.memorandum.activity;
 import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
-import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
@@ -11,12 +10,12 @@ import android.database.sqlite.SQLiteDatabase;
 import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
@@ -274,8 +273,18 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
         switch (v.getId()) {
             case R.id.btn_newone:
                 customPopwindow = new CustomPopwindow(this, this);
-                customPopwindow.setBackgroundDrawable(null);
-                customPopwindow.showAsDropDown(v, -20, -620, Gravity.TOP);
+                customPopwindow.setBackgroundDrawable(getResources().getDrawable(R.drawable.bg_popwindow));
+                customPopwindow.showAsDropDown(v, (int) getResources().getDimension(R.dimen.popwindow_marginRight), (int) getResources().getDimension(R.dimen.popwindow_marginBottom), Gravity.TOP);
+                customPopwindow.setTouchInterceptor(new View.OnTouchListener() {
+                    @Override
+                    public boolean onTouch(View v, MotionEvent event) {
+                        if (event.getAction() == MotionEvent.ACTION_OUTSIDE) {
+                            customPopwindow.dismiss();
+                            return true;
+                        }
+                        return false;
+                    }
+                });
                 break;
             case R.id.btn_text:
                 intent = new Intent(this, NewOne_activity.class);
@@ -482,12 +491,14 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
                                     viewHolder.time.setBackgroundResource(R.drawable.bg_player_normal);
                                 } else {
                                     player.start();
-                                    viewHolder.image.setBackgroundResource(R.drawable.btn_pause);
-                                    running = true;
-                                    if (!runed || playingItem == -1) {
-                                        updateSeekBar();
+                                    if (player.isPlaying) {
+                                        viewHolder.image.setBackgroundResource(R.drawable.btn_pause);
+                                        running = true;
+                                        if (!runed || playingItem == -1) {
+                                            updateSeekBar();
+                                        }
+                                        playingItem = arg2;
                                     }
-                                    playingItem = arg2;
                                 }
 
                             }
