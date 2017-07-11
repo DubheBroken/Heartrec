@@ -259,17 +259,11 @@ public class NewOne_activity extends Activity implements OnClickListener {
         dialog.getWindow().setAttributes(params);
     }
 
-    //    删除记录
-    public void delete(int id) {
-        SQLiteDatabase db = sqliteHelper.getWritableDatabase();//打开数据库
-        try {
-            String sql = "deleteText from " + Constant.TABLE_NAME + " where " + Constant.ID + "=\"" + id + "\";";
-            Log.i("strsql", sql);
-            DbManager.execSQL(db, sql);
-            Log.i("execSQL", "删除数据成功");
-        } catch (Exception e) {
-            Log.e("execSQL", "删除数据出错");
+    private String escape(String str) {
+        if (str.contains("'")) {
+            str = str.replace("'", "''");
         }
+        return str;
     }
 
     //    保存
@@ -277,14 +271,18 @@ public class NewOne_activity extends Activity implements OnClickListener {
         Log.i("---click save---", "点击保存按钮");
         if (substance != null && !"".equals(substance)) {
             SQLiteDatabase db = sqliteHelper.getWritableDatabase();//打开数据库
+            Log.i("---处理前---", substance);
+            substance = escape(substance);
+            Log.i("---处理后---", substance);
             if (id != null && !id.equals("")) {
                 try {
-                    String sql = "update " + Constant.TABLE_NAME + " set " + "" + Constant.SUBSTANCE + "=\"" + substance + "\"," + Constant.TIME + "=\"" + nowtime + "\" where " + Constant.ID + "=" + id + ";";
+                    String sql = "update " + Constant.TABLE_NAME + " set " + "" + Constant.SUBSTANCE + "='" + substance + "'," + Constant.TIME + "=\"" + nowtime + "\" where " + Constant.ID + "=" + id + ";";
                     Log.i("strsql", sql);
                     DbManager.execSQL(db, sql);
                     Log.i("---execSQL---", "更新数据成功");
                 } catch (Exception e) {
                     Log.e("---execSQL---", "更新数据失败");
+                    e.printStackTrace();
                 }
             } else {
                 try {
@@ -342,79 +340,5 @@ public class NewOne_activity extends Activity implements OnClickListener {
         db.close();//关闭数据库
         Log.i("execSQL", "数据库已关闭");
     }
-
-//    【已弃用】自动保存
-//    private class ProvOnItemSelectedListener implements AdapterView.OnItemSelectedListener {
-
-//        @Override
-//        public void onItemSelected(AdapterView<?> adapter, View view, int position, long id){
-//            //获取选择的项的值
-//            switch (view.getId()) {
-//                case R.id.spinner_interval:
-//                    switch (spinner_interval.getSelectedItem().toString()) {
-//                        case "1秒":
-//                            interval=1000;
-//                            Log.i("interval","自动保存延迟变为1秒");
-//                            break;
-//                        case "3秒":
-//                            interval=3000;
-//                            Log.i("interval","自动保存延迟变为3秒");
-//                            break;
-//                        case "5秒":
-//                            interval=5000;
-//                            Log.i("interval","自动保存延迟变为5秒");
-//                            break;
-//                        case "10秒":
-//                            interval=10000;
-//                            Log.i("interval","自动保存延迟变为10秒");
-//                    }
-//                    break;
-//
-//            }
-//        }
-
-//        @Override
-//        public void onNothingSelected(AdapterView<?> arg0) {
-//            //未选中任何选项
-//        }
-//
-//
-//    }
-
-//    private void changeBg(){
-//        switch (option_helper.getSkin()) {
-//            case "蓝色":
-//                layout.setBackground(context.getDrawable(R.mipmap.blue));
-//                break;
-//            case "绿色":
-//                layout.setBackground(context.getDrawable(R.mipmap.green));
-//                break;
-//            case "白色":
-//                layout.setBackground(context.getDrawable(R.mipmap.white));
-//                break;
-//            case "红色":
-//                layout.setBackground(context.getDrawable(R.mipmap.red));
-//                break;
-//            case "粉色":
-//                layout.setBackground(context.getDrawable(R.mipmap.pink));
-//                break;
-//            case "黄色":
-//                layout.setBackground(context.getDrawable(R.mipmap.yellow));
-//                break;
-//            case "青色":
-//                layout.setBackground(context.getDrawable(R.mipmap.bluegreen));
-//                break;
-//            case "深蓝色":
-//                layout.setBackground(context.getDrawable(R.mipmap.bluepurple));
-//                break;
-//            case "紫色":
-//                layout.setBackground(context.getDrawable(R.mipmap.purple));
-//                break;
-//            default:
-//                layout.setBackground(context.getDrawable(R.mipmap.yellow));
-//                break;
-//        }
-//    }
-
 
 }

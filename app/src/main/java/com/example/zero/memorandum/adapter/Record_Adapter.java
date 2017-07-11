@@ -21,6 +21,7 @@ import com.example.zero.memorandum.entity.Paint_Entity;
 import com.example.zero.memorandum.entity.Record_Entity;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -32,10 +33,12 @@ public class Record_Adapter extends BaseAdapter {
 
     private Context context;
     private List<Record_Entity> list;
+    private List<ViewHolder> viewHolderList;
 
     public Record_Adapter(Main_activity mainActivity, List<Record_Entity> list) {
         this.context = mainActivity;
         this.list = list;
+        this.viewHolderList = new ArrayList<>();
     }
 
     @Override
@@ -53,6 +56,10 @@ public class Record_Adapter extends BaseAdapter {
         return i;
     }
 
+    public List<ViewHolder> getViewHolderList(){
+        return this.viewHolderList;
+    }
+
     @Override
     public View getView(int i, View view, ViewGroup viewGroup) {
         ViewHolder holder = null;
@@ -65,6 +72,7 @@ public class Record_Adapter extends BaseAdapter {
             holder.time = (TextView) view.findViewById(R.id.record_item_time);
             holder.image = (TextView) view.findViewById(R.id.record_item_play);
 
+            viewHolderList.add(holder);
             view.setTag(holder);
         } else {
             holder = (ViewHolder) view.getTag();

@@ -15,7 +15,6 @@ import android.provider.MediaStore;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
@@ -26,7 +25,6 @@ import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
-import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.example.zero.memorandum.AppData;
@@ -59,12 +57,13 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
     private List<Text_Entity> listText;
     private List<Paint_Entity> listPaint;
     private List<Record_Entity> listRecord;
+    private List<Record_Adapter.ViewHolder> viewHolderList;
     private Player player;
+    int playingItem = -1;//正在播放的项目，-1表示无
+    private boolean runed = false;//是否允许过动画线程
 
-    private ContentResolver mResolver;
-
-    private Runnable switchRunnable, loopRunnable, toNormalRunnable;
-    private Thread switchThread, loopThread, toNormalThread;
+    private Runnable switchRunnable, loopRunnable, toNormalRunnable, recoverRunnable;
+    private Thread loopThread;
     private ExecutorService cacheThreadPool;
     private boolean running = true;
 
@@ -325,8 +324,6 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
         imageRecord = (ImageView) findViewById(R.id.image_record);
         bottomBtnRecord = (TextView) findViewById(R.id.bottom_btn_record);
 
-        mResolver = getContentResolver();
-
         cacheThreadPool = Executors.newCachedThreadPool();
         initAdapter(1);
 
@@ -439,6 +436,8 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
                 getRecord(listRecord);
                 recordAdapter = new Record_Adapter(this, listRecord);
 
+                viewHolderList = recordAdapter.getViewHolderList();
+
                 //    item点击事件
                 listView.setOnItemClickListener((new AdapterView.OnItemClickListener() {
 
@@ -446,27 +445,18 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
                             public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
                                                     long arg3) {
                                 // TODO Auto-generated method stub);
-                                View view1 = listView.getChildAt(arg2);
-                                final Record_Adapter.ViewHolder viewHolder = (Record_Adapter.ViewHolder) view1.getTag();
-                                if (player != null && player.isPlaying) {
+                                final Record_Adapter.ViewHolder viewHolder = viewHolderList.get(arg2);
+                                if (player != null && player.isPlaying && arg2 != playingItem) {
                                     player.stop();
                                     player = null;
                                     loopThread.interrupt();
                                     running = false;
-                                    viewHolder.image.setBackgroundResource(R.drawable.btn_play);
-                                    viewHolder.time.setBackgroundResource(R.drawable.bg_player_normal);
-
-                                    player = new Player(Main_activity.this, listRecord.get(arg2).getFilename());
-                                    player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                                        @Override
-                                        public void onCompletion(MediaPlayer mp) {
-                                            player = null;
-                                            loopThread.interrupt();
-                                            running = false;
-                                            viewHolder.image.setBackgroundResource(R.drawable.btn_play);
-                                            viewHolder.time.setBackgroundResource(R.drawable.bg_player_normal);
-                                        }
-                                    });
+                                }
+                                for (int i = 0; i < viewHolderList.size(); i++) {
+                                    TextView image = viewHolderList.get(i).image;
+                                    TextView time = viewHolderList.get(i).time;
+                                    image.setBackgroundResource(R.drawable.btn_play);
+                                    time.setBackgroundResource(R.drawable.bg_player_normal);
                                 }
                                 if (player == null) {
                                     player = new Player(Main_activity.this, listRecord.get(arg2).getFilename());
@@ -478,6 +468,7 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
                                             running = false;
                                             viewHolder.image.setBackgroundResource(R.drawable.btn_play);
                                             viewHolder.time.setBackgroundResource(R.drawable.bg_player_normal);
+                                            playingItem = -1;
                                         }
                                     });
                                 }
@@ -486,15 +477,18 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
                                     player = null;
                                     loopThread.interrupt();
                                     running = false;
+                                    playingItem = -1;
                                     viewHolder.image.setBackgroundResource(R.drawable.btn_play);
                                     viewHolder.time.setBackgroundResource(R.drawable.bg_player_normal);
                                 } else {
                                     player.start();
                                     viewHolder.image.setBackgroundResource(R.drawable.btn_pause);
                                     running = true;
-                                    updateSeekBar(viewHolder.time);
+                                    if (!runed || playingItem == -1) {
+                                        updateSeekBar();
+                                    }
+                                    playingItem = arg2;
                                 }
-
 
                             }
                         })
@@ -518,23 +512,39 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
 
     }
 
-    private String getFileName(String string) {
-        String[] str = string.split("/");
-        return str[str.length - 1];
-    }
-
     //同步seekbar与进度条时间
-    private void updateSeekBar(final TextView textView) {
+    private void updateSeekBar() {
+        runed = true;
         loopRunnable = new Runnable() {
             @Override
             public void run() {
                 if (running) {
                     try {
-                        displayAnim(textView, true);
+                        for (int i = 0; i < viewHolderList.size(); i++) {
+                            if (i == playingItem) {
+                                continue;
+                            }
+                            final TextView image = viewHolderList.get(i).image;
+                            final TextView time = viewHolderList.get(i).time;
+                            recoverRunnable = new Runnable() {
+                                @Override
+                                public void run() {
+                                    if (running) {
+                                        image.setBackgroundResource(R.drawable.btn_play);
+                                        time.setBackgroundResource(R.drawable.bg_player_normal);
+                                    }
+                                }
+                            };
+                            if (running) {
+                                runOnUiThread(recoverRunnable);
+                            }
+
+                        }
+                        displayAnim(viewHolderList.get(playingItem).time, true);
                         Thread.sleep(200);
-                        displayAnim(textView, false);
+                        displayAnim(viewHolderList.get(playingItem).time, false);
                         Thread.sleep(200);
-                        updateSeekBar(textView);
+                        updateSeekBar();
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -542,7 +552,9 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
             }
         };
         loopThread = new Thread(loopRunnable);
-        cacheThreadPool.execute(loopThread);
+        if (running) {
+            cacheThreadPool.execute(loopThread);
+        }
     }
 
     private void displayAnim(TextView textView, boolean bool) {
@@ -590,7 +602,9 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
                     }
                 }
             };
-            runOnUiThread(switchRunnable);
+            if (running) {
+                runOnUiThread(switchRunnable);
+            }
             try {
                 Thread.sleep(200);
             } catch (InterruptedException e) {
@@ -605,7 +619,9 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
                     }
                 }
             };
-            runOnUiThread(toNormalRunnable);
+            if (running) {
+                runOnUiThread(toNormalRunnable);
+            }
             Log.i("---updateProgress---", "切换到默认");
         }
     }
