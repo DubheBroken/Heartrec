@@ -98,7 +98,11 @@ public class NewOne_activity extends Activity implements OnClickListener {
             tintManager.setNavigationBarTintEnabled(true);
 
             // 状态栏背景色
-            tintManager.setTintColor(getColor(R.color.colorAccent));
+            if (Build.VERSION.SDK_INT < 23) {
+                tintManager.setStatusBarTintResource(R.color.colorAccent);
+            } else {
+                tintManager.setTintColor(getColor(R.color.colorAccent));
+            }
         }
 
 

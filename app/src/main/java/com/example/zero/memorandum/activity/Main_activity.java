@@ -110,7 +110,11 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
             tintManager.setNavigationBarTintEnabled(true);
 
             // 状态栏背景色
-            tintManager.setTintColor(getColor(R.color.colorAccent));
+            if (Build.VERSION.SDK_INT < 23) {
+                tintManager.setStatusBarTintResource(R.color.colorAccent);
+            } else {
+                tintManager.setTintColor(getColor(R.color.colorAccent));
+            }
         }
 
 
@@ -274,7 +278,7 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
             case R.id.btn_newone:
                 customPopwindow = new CustomPopwindow(this, this);
                 customPopwindow.setBackgroundDrawable(getResources().getDrawable(R.drawable.bg_popwindow));
-                customPopwindow.showAsDropDown(v, (int) getResources().getDimension(R.dimen.popwindow_marginRight), (int) getResources().getDimension(R.dimen.popwindow_marginBottom), Gravity.TOP);
+                customPopwindow.showAsDropDown(v, (int) getResources().getDimension(R.dimen.popwindow_marginLeft), (int) getResources().getDimension(R.dimen.popwindow_marginBottom), Gravity.TOP);
                 customPopwindow.setTouchInterceptor(new View.OnTouchListener() {
                     @Override
                     public boolean onTouch(View v, MotionEvent event) {
