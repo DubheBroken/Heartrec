@@ -49,7 +49,7 @@
         android:id="@+id/fragment_navigation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:name="com.example.zero.memorandum.fragment.Bottom_Fragment"
+        android:name="com.zdk.pojun.heartrec.fragment.Bottom_Fragment"
         tools:layout="@layout/bottom_layout" />
 
 </LinearLayout>

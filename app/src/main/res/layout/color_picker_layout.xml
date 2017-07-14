@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <com.example.zero.memorandum.custom.ColorPickView
+    <com.zdk.pojun.heartrec.custom.ColorPickView
         android:layout_marginTop="@dimen/colorPicker_marginTop"
         android:layout_gravity="center"
         android:id="@+id/color_picker_view"

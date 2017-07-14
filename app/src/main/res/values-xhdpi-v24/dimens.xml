@@ -13,7 +13,7 @@
     <dimen name="bottomFragment_marginBottom">2dp</dimen>
     <dimen name="popwindow_marginBottom">-420px</dimen>
     <dimen name="popwindow_marginLeft">-10px</dimen>
-    <dimen name="dialog_height">280px</dimen>
+    <dimen name="dialog_height">300px</dimen>
     <dimen name="colorButton_margin">36dp</dimen>
     <dimen name="colorButton_marginFirst">40dp</dimen>
     <dimen name="colorPicker_marginTop">40dp</dimen>

@@ -1,5 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.zero.memorandum">
+    package="com.zdk.pojun.heartrec"
+    >
 
     <!--长按权限-->
     <uses-permission android:name="android.permission.SET_WALLPAPER" />
@@ -22,12 +23,13 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme"
+        >
 
         <activity
-            android:name=".activity.Main_activity"
             android:exported="true"
-            android:label="@string/app_name">
+            android:label="@string/app_name"
+            android:name="com.zdk.pojun.heartrec.activity.Main_activity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -35,18 +37,22 @@
         </activity>
 
         <activity
-            android:name=".activity.NewOne_activity"></activity>
+            android:label="@string/app_name"
+            android:name="com.zdk.pojun.heartrec.activity.NewOne_activity"></activity>
 
         <activity
-            android:name=".activity.Painter_activity"
+            android:label="@string/app_name"
+            android:name="com.zdk.pojun.heartrec.activity.Painter_activity"
             android:exported="true"></activity>
 
         <activity
-            android:name=".activity.ColorSelect_activity"
+            android:label="@string/app_name"
+            android:name="com.zdk.pojun.heartrec.activity.ColorSelect_activity"
             android:theme="@style/MyDialogStyle"></activity>
 
         <activity
-            android:name=".activity.Record_activity"
+            android:label="@string/app_name"
+            android:name="com.zdk.pojun.heartrec.activity.Record_activity"
             android:theme="@style/MyDialogStyle"></activity>
 
     </application>
