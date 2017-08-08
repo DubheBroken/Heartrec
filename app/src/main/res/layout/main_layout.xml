@@ -4,6 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:fab="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:fitsSystemWindows="true"
     android:clipToPadding="false"
@@ -22,21 +23,46 @@
 
      </ListView>
 
-    <android.support.design.widget.FloatingActionButton
+    <floatingactionbutton.FloatingActionsMenu
         android:layout_marginTop="-88dp"
         android:id="@+id/btn_newone"
         android:layout_height="@dimen/FloatingActionButton_size"
         android:layout_width="@dimen/FloatingActionButton_size"
-        android:src="@drawable/btn_new_one"
         android:layout_gravity="right"
         android:layout_marginRight="@dimen/FloatingActionButton_margin"
         android:layout_marginBottom="@dimen/FloatingActionButton_margin"
-        app:elevation="4dp"
-        app:rippleColor="@color/colorAccent"
-        app:pressedTranslationZ="8dp"
-        app:borderWidth="0dp"
-        android:backgroundTint="@color/colorAccent"
-        />
+        app:fab_addButtonColorNormal="@color/colorAccent"
+        app:fab_addButtonColorPressed="@color/colorAccent"
+        >
+
+        <com.getbase.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_new_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            fab:fab_icon="@drawable/btn_text"
+            fab:fab_colorNormal="@color/white"
+            fab:fab_colorPressed="@color/white"
+            />
+
+        <com.getbase.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_new_paint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            fab:fab_icon="@drawable/btn_paint"
+            fab:fab_colorNormal="@color/white"
+            fab:fab_colorPressed="@color/white"
+            />
+
+        <com.getbase.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_new_record"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            fab:fab_icon="@drawable/btn_record"
+            fab:fab_colorNormal="@color/white"
+            fab:fab_colorPressed="@color/white"
+            />
+
+    </floatingactionbutton.FloatingActionsMenu>
 
     <!--分割线-->
     <View

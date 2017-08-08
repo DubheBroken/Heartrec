@@ -6,7 +6,7 @@
     <dimen name="painter_line_marginTop">98dp</dimen>
     <dimen name="painter_marginTop">101dp</dimen>
     <dimen name="textsize_paintsize">10sp</dimen>
-    <dimen name="FloatingActionButton_margin">36dp</dimen>
+    <dimen name="FloatingActionButton_margin">30dp</dimen>
     <dimen name="FloatingActionButton_size">64dp</dimen>
     <dimen name="bottomButton_size">64dp</dimen>
     <dimen name="bottomText_size">13sp</dimen>
@@ -18,4 +18,20 @@
     <dimen name="colorButton_marginFirst">48dp</dimen>
     <dimen name="colorPicker_marginTop">102dp</dimen>
     <dimen name="dialog_verticalMargin">0px</dimen>
+	
+	<dimen name="fab_size_normal">56dp</dimen>
+    <dimen name="fab_size_mini">40dp</dimen>
+
+    <dimen name="fab_icon_size">24dp</dimen>
+
+    <dimen name="fab_plus_icon_size">14dp</dimen>
+    <dimen name="fab_plus_icon_stroke">2dp</dimen>
+
+    <dimen name="fab_shadow_offset">3dp</dimen>
+    <dimen name="fab_shadow_radius">9dp</dimen>
+
+    <dimen name="fab_stroke_width">1dp</dimen>
+
+    <dimen name="fab_actions_spacing">8dp</dimen>
+    <dimen name="fab_labels_margin">8dp</dimen>
 </resources>

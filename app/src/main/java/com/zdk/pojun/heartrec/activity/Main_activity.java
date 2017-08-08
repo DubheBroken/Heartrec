@@ -11,13 +11,10 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
-import android.view.Gravity;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
@@ -42,6 +39,7 @@ import com.zdk.pojun.heartrec.adapter.Text_Adapter;
 import com.zdk.pojun.heartrec.entity.Text_Entity;
 import com.zdk.pojun.heartrec.utils.SqliteHelper;
 import com.readystatesoftware.systembartint.SystemBarTintManager;
+import com.getbase.floatingactionbutton.FloatingActionButton;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -50,6 +48,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import floatingactionbutton.FloatingActionsMenu;
 
 /**
  * Created by Zero on 2017/2/15.
@@ -78,8 +78,8 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
     private SqliteHelper sqliteHelper;
 
     //    注册控件
-    private FloatingActionButton FAB_new_one;
-    private CustomPopwindow customPopwindow;
+    private FloatingActionsMenu FAB_new_one;
+    private FloatingActionButton fab_text,fab_paint,fab_record;
     private LinearLayout btnTextNavigation;
     private ImageView imageText;
     private TextView bottomBtnText;
@@ -278,35 +278,17 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
     public void onClick(View v) {
         Intent intent;
         switch (v.getId()) {
-            case R.id.btn_newone:
-                customPopwindow = new CustomPopwindow(this, this);
-                customPopwindow.setBackgroundDrawable(getResources().getDrawable(R.drawable.bg_popwindow));
-                customPopwindow.showAsDropDown(v, (int) getResources().getDimension(R.dimen.popwindow_marginLeft), (int) getResources().getDimension(R.dimen.popwindow_marginBottom), Gravity.TOP);
-                customPopwindow.setTouchInterceptor(new View.OnTouchListener() {
-                    @Override
-                    public boolean onTouch(View v, MotionEvent event) {
-                        if (event.getAction() == MotionEvent.ACTION_OUTSIDE) {
-                            customPopwindow.dismiss();
-                            return true;
-                        }
-                        return false;
-                    }
-                });
-                break;
-            case R.id.btn_text:
+            case R.id.fab_new_text:
                 intent = new Intent(this, NewOne_activity.class);
                 startActivity(intent);
-                customPopwindow.dismiss();
                 break;
-            case R.id.btn_picture:
+            case R.id.fab_new_paint:
                 intent = new Intent(this, Painter_activity.class);
                 startActivity(intent);
-                customPopwindow.dismiss();
                 break;
-            case R.id.btn_sound:
+            case R.id.fab_new_record:
                 intent = new Intent(this, Record_activity.class);
                 startActivity(intent);
-                customPopwindow.dismiss();
                 break;
             case R.id.btn_text_navigation:
                 //切换到文字记事列表
@@ -329,7 +311,10 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
     private void initView() {
 //        实例化控件
         listView = (ListView) findViewById(R.id.itemlist);
-        FAB_new_one = (FloatingActionButton) findViewById(R.id.btn_newone);
+        FAB_new_one = (FloatingActionsMenu) findViewById(R.id.btn_newone);
+        fab_text = (FloatingActionButton) findViewById(R.id.fab_new_text);
+        fab_paint = (FloatingActionButton) findViewById(R.id.fab_new_paint);
+        fab_record = (FloatingActionButton) findViewById(R.id.fab_new_record);
         btnTextNavigation = (LinearLayout) findViewById(R.id.btn_text_navigation);
         imageText = (ImageView) findViewById(R.id.image_text);
         bottomBtnText = (TextView) findViewById(R.id.bottom_btn_text);
@@ -340,11 +325,15 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
         imageRecord = (ImageView) findViewById(R.id.image_record);
         bottomBtnRecord = (TextView) findViewById(R.id.bottom_btn_record);
 
+
         cacheThreadPool = Executors.newCachedThreadPool();
         initAdapter(1);
 
         //        点击监听
         FAB_new_one.setOnClickListener(this);
+        fab_text.setOnClickListener(this);
+        fab_paint.setOnClickListener(this);
+        fab_record.setOnClickListener(this);
         btnTextNavigation.setOnClickListener(this);
         btnPaintNavigation.setOnClickListener(this);
         btnRecordNavigation.setOnClickListener(this);
