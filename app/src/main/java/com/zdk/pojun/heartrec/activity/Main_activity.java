@@ -12,9 +12,12 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 
+import android.support.annotation.NonNull;
+import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
@@ -80,15 +83,7 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
     //    注册控件
     private FloatingActionsMenu FAB_new_one;
     private FloatingActionButton fab_text,fab_paint,fab_record;
-    private LinearLayout btnTextNavigation;
-    private ImageView imageText;
-    private TextView bottomBtnText;
-    private LinearLayout btnPaintNavigation;
-    private ImageView imagePaint;
-    private TextView bottomBtnPaint;
-    private LinearLayout btnRecordNavigation;
-    private ImageView imageRecord;
-    private TextView bottomBtnRecord;
+    private BottomNavigationView navigation;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -290,20 +285,10 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
                 intent = new Intent(this, Record_activity.class);
                 startActivity(intent);
                 break;
-            case R.id.btn_text_navigation:
-                //切换到文字记事列表
-                initAdapter(1);
-                break;
-            case R.id.btn_paint_navigation:
-                //切换到图片记事列表
-                initAdapter(2);
-                break;
-            case R.id.btn_record_navigation:
-                //切换到录音记事列表
-                initAdapter(3);
-                break;
         }
     }
+
+
 
     /**
      * 初始化view
@@ -315,16 +300,7 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
         fab_text = (FloatingActionButton) findViewById(R.id.fab_new_text);
         fab_paint = (FloatingActionButton) findViewById(R.id.fab_new_paint);
         fab_record = (FloatingActionButton) findViewById(R.id.fab_new_record);
-        btnTextNavigation = (LinearLayout) findViewById(R.id.btn_text_navigation);
-        imageText = (ImageView) findViewById(R.id.image_text);
-        bottomBtnText = (TextView) findViewById(R.id.bottom_btn_text);
-        btnPaintNavigation = (LinearLayout) findViewById(R.id.btn_paint_navigation);
-        imagePaint = (ImageView) findViewById(R.id.image_paint);
-        bottomBtnPaint = (TextView) findViewById(R.id.bottom_btn_paint);
-        btnRecordNavigation = (LinearLayout) findViewById(R.id.btn_record_navigation);
-        imageRecord = (ImageView) findViewById(R.id.image_record);
-        bottomBtnRecord = (TextView) findViewById(R.id.bottom_btn_record);
-
+        navigation = (BottomNavigationView) findViewById(R.id.navigation);
 
         cacheThreadPool = Executors.newCachedThreadPool();
         initAdapter(1);
@@ -334,14 +310,38 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
         fab_text.setOnClickListener(this);
         fab_paint.setOnClickListener(this);
         fab_record.setOnClickListener(this);
-        btnTextNavigation.setOnClickListener(this);
-        btnPaintNavigation.setOnClickListener(this);
-        btnRecordNavigation.setOnClickListener(this);
+
+        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
     }
+
+    private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
+            = new BottomNavigationView.OnNavigationItemSelectedListener() {
+
+        @Override
+        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+            switch (item.getItemId()) {
+                case R.id.navigation_text:
+                    //初始化文本适配器
+                    initAdapter(1);
+
+                    return true;
+                case R.id.navigation_paint:
+                    //初始化涂鸦适配器
+                    initAdapter(2);
+                    return true;
+                case R.id.navigation_record:
+                    //初始化录音适配器
+                    initAdapter(3);
+                    return true;
+            }
+            return false;
+        }
+    };
 
     @Override
     protected void onResume() {
         super.onResume();
+        FAB_new_one.collapse();
         sqliteHelper = DbManager.getIntance(this);
         initView();
         initAdapter(AppData.getFinalPage());
@@ -351,7 +351,6 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
      * 初始化Adapter
      */
     private void initAdapter(int i) {
-        initNavigation(i);
         switch (i) {
             case 1:
 //                初始化文字适配器
@@ -697,29 +696,6 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
                     }
                 }
             }
-        }
-    }
-
-    private void initNavigation(int i) {
-        bottomBtnPaint.setTextColor(getResources().getColor(R.color.text_black));
-        bottomBtnText.setTextColor(getResources().getColor(R.color.text_black));
-        bottomBtnRecord.setTextColor(getResources().getColor(R.color.text_black));
-        imagePaint.setColorFilter(getResources().getColor(R.color.gray));
-        imageText.setColorFilter(getResources().getColor(R.color.gray));
-        imageRecord.setColorFilter(getResources().getColor(R.color.gray));
-        switch (i) {
-            case 1:
-                bottomBtnText.setTextColor(getResources().getColor(R.color.colorAccent));
-                imageText.setColorFilter(getResources().getColor(R.color.colorAccent));
-                break;
-            case 2:
-                bottomBtnPaint.setTextColor(getResources().getColor(R.color.colorAccent));
-                imagePaint.setColorFilter(getResources().getColor(R.color.colorAccent));
-                break;
-            case 3:
-                bottomBtnRecord.setTextColor(getResources().getColor(R.color.colorAccent));
-                imageRecord.setColorFilter(getResources().getColor(R.color.colorAccent));
-                break;
         }
     }
 

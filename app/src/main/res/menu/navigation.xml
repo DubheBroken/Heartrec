@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/navigation_text"
+        android:icon="@drawable/ic_title_black_24dp"
+        android:title="文字" />
+
+    <item
+        android:id="@+id/navigation_paint"
+        android:icon="@drawable/ic_paint_black_24dp"
+        android:title="涂鸦" />
+
+    <item
+        android:id="@+id/navigation_record"
+        android:icon="@drawable/ic_record_24dp"
+        android:title="录音" />
+
+</menu>
