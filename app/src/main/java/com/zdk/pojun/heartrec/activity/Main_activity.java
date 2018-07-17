@@ -14,8 +14,12 @@ import android.os.Bundle;
 
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentActivity;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,8 +27,6 @@ import android.view.View.OnClickListener;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AdapterView;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -33,7 +35,6 @@ import com.zdk.pojun.heartrec.AppData;
 import com.zdk.pojun.heartrec.R;
 import com.zdk.pojun.heartrec.adapter.Paint_Adapter;
 import com.zdk.pojun.heartrec.adapter.Record_Adapter;
-import com.zdk.pojun.heartrec.custom.CustomPopwindow;
 import com.zdk.pojun.heartrec.entity.Paint_Entity;
 import com.zdk.pojun.heartrec.entity.Record_Entity;
 import com.zdk.pojun.heartrec.utils.Constant;
@@ -58,7 +59,7 @@ import floatingactionbutton.FloatingActionsMenu;
  * Created by Zero on 2017/2/15.
  */
 
-public class Main_activity extends FragmentActivity implements OnClickListener {
+public class Main_activity extends AppCompatActivity implements OnClickListener {
 
     private List<Text_Entity> listText;
     private List<Paint_Entity> listPaint;
@@ -84,6 +85,8 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
     private FloatingActionsMenu FAB_new_one;
     private FloatingActionButton fab_text,fab_paint,fab_record;
     private BottomNavigationView navigation;
+    private DrawerLayout drawer;
+    private NavigationView navigationView;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -302,6 +305,13 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
         fab_record = (FloatingActionButton) findViewById(R.id.fab_new_record);
         navigation = (BottomNavigationView) findViewById(R.id.navigation);
 
+        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, null, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
+        navigationView = (NavigationView) findViewById(R.id.nav_view);
+
         cacheThreadPool = Executors.newCachedThreadPool();
         initAdapter(1);
 
@@ -311,9 +321,34 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
         fab_paint.setOnClickListener(this);
         fab_record.setOnClickListener(this);
 
+        //侧栏监听器
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
+        navigationView.setNavigationItemSelectedListener(
+                new NavigationView.OnNavigationItemSelectedListener(){
+                    @Override
+                    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                        // Handle navigation view item clicks here.
+                        int id = item.getItemId();
+
+                        if (id == R.id.nav_home) {
+                            // Handle the camera action
+                        } else if (id == R.id.nav_remind) {
+
+                        } else if (id == R.id.nav_cloud) {
+
+                        } else if (id == R.id.nav_setting) {
+
+                        } else if (id == R.id.nav_help) {
+
+                        }
+
+                        drawer.closeDrawer(GravityCompat.START);
+                        return true;
+                    }
+                });
     }
 
+    //底部导航监听器
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
 

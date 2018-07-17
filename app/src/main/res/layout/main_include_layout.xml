@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:fab="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:fitsSystemWindows="true"
+    android:clipToPadding="false"
+    >
+
+     <ListView
+         android:id="@+id/itemlist"
+         android:layout_marginLeft="8dp"
+         android:layout_marginRight="8dp"
+         android:layout_width="match_parent"
+         android:layout_height="match_parent"
+         android:scrollbars="none"
+         android:footerDividersEnabled="true"
+         android:layout_weight="1"
+         >
+
+     </ListView>
+
+    <include layout="@layout/content_main" />
+
+    <floatingactionbutton.FloatingActionsMenu
+        android:layout_marginTop="-88dp"
+        android:id="@+id/btn_newone"
+        android:layout_height="@dimen/FloatingActionButton_size"
+        android:layout_width="@dimen/FloatingActionButton_size"
+        android:layout_gravity="right"
+        android:layout_marginRight="@dimen/FloatingActionButton_margin"
+        android:layout_marginBottom="@dimen/FloatingActionButton_margin"
+        app:fab_addButtonColorNormal="@color/colorAccent"
+        app:fab_addButtonColorPressed="@color/colorAccent"
+        >
+
+        <com.getbase.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_new_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            fab:fab_icon="@drawable/btn_text"
+            fab:fab_colorNormal="@color/white"
+            fab:fab_colorPressed="@color/white"
+            />
+
+        <com.getbase.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_new_paint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            fab:fab_icon="@drawable/btn_paint"
+            fab:fab_colorNormal="@color/white"
+            fab:fab_colorPressed="@color/white"
+            />
+
+        <com.getbase.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_new_record"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            fab:fab_icon="@drawable/btn_record"
+            fab:fab_colorNormal="@color/white"
+            fab:fab_colorPressed="@color/white"
+            />
+
+    </floatingactionbutton.FloatingActionsMenu>
+
+    <!--分割线-->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="3dp"
+        android:background="@drawable/line_bottom"/>
+
+    <android.support.design.widget.BottomNavigationView
+        android:id="@+id/navigation"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="0dp"
+        android:layout_marginStart="0dp"
+        android:layout_weight="0"
+        android:background="?android:attr/windowBackground"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:itemIconTint="@drawable/selector_item_color"
+        app:itemTextColor="@drawable/selector_item_color"
+        app:menu="@menu/navigation" />
+
+</LinearLayout>

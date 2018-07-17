@@ -12,5 +12,12 @@
     <string name="editing">编辑记事</string>
     <string name="painter">画板</string>
 
+    <!--侧边栏内容-->
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <string name="nav_header_title">心录记事</string>
+    <string name="nav_header_subtitle">z1574507001@gmail.com</string>
+    <string name="nav_header_desc">Navigation header</string>
+    <string name="action_settings">设置</string>
 
 </resources>
