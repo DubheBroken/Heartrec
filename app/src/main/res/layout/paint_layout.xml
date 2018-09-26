@@ -1,116 +1,151 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/framelayout_paint"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/framelayout_paint"
-    android:fitsSystemWindows="true"
     android:clipToPadding="false"
-    >
+    android:fitsSystemWindows="true">
 
     <!--顶部功能栏-->
-    <LinearLayout
-        android:layout_marginTop="8dp"
-        android:layout_marginLeft="4dp"
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/constraintLayout2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
         android:orientation="horizontal"
+        app:layout_constraintTop_toTopOf="parent"
         >
 
         <TextView
-            android:layout_margin="@dimen/tools_margin"
             android:id="@+id/btn_back_paint"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/tools_margin"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="19dp"
             android:background="@drawable/btn_back"
-            />
+            app:layout_constraintEnd_toStartOf="@+id/btn_revoke_paint"
+            app:layout_constraintStart_toStartOf="parent" />
 
         <TextView
-            android:layout_margin="@dimen/tools_margin"
             android:id="@+id/btn_revoke_paint"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/tools_margin"
+            android:layout_marginStart="32dp"
+            android:layout_marginEnd="22dp"
             android:background="@drawable/bg_revoke"
-            />
+            app:layout_constraintEnd_toStartOf="@+id/btn_redo_paint"
+            app:layout_constraintStart_toEndOf="@+id/btn_back_paint"
+            tools:layout_editor_absoluteY="0dp" />
 
         <TextView
-            android:layout_margin="@dimen/tools_margin"
             android:id="@+id/btn_redo_paint"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/tools_margin"
+            android:layout_marginStart="32dp"
+            android:layout_marginEnd="27dp"
             android:background="@drawable/bg_redo"
-            />
+            app:layout_constraintEnd_toStartOf="@+id/btn_pen_style_paint"
+            app:layout_constraintStart_toEndOf="@+id/btn_revoke_paint"
+            tools:layout_editor_absoluteY="0dp" />
 
         <TextView
-            android:layout_margin="@dimen/tools_margin"
             android:id="@+id/btn_clean_paint"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/tools_margin"
+            android:layout_marginStart="44dp"
+            android:layout_marginEnd="36dp"
             android:background="@drawable/btn_delete"
-            />
+            app:layout_constraintEnd_toStartOf="@+id/btn_save_paint"
+            app:layout_constraintStart_toEndOf="@+id/btn_pen_color_paint"
+            tools:layout_editor_absoluteY="0dp" />
 
         <ImageView
-            android:layout_margin="@dimen/tools_margin"
             android:id="@+id/btn_pen_style_paint"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/tools_margin"
             android:background="@drawable/pen_style"
-            />
+            app:layout_constraintEnd_toStartOf="@+id/btn_pen_color_paint"
+            app:layout_constraintStart_toEndOf="@+id/btn_redo_paint"
+            tools:layout_editor_absoluteY="0dp" />
 
         <TextView
-            android:layout_margin="@dimen/tools_margin"
             android:id="@+id/btn_pen_color_paint"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/tools_margin"
+            android:layout_marginStart="66dp"
+            android:layout_marginEnd="8dp"
             android:background="@drawable/btn_pen_color"
-            />
+            app:layout_constraintEnd_toStartOf="@+id/btn_clean_paint"
+            app:layout_constraintStart_toEndOf="@+id/btn_pen_style_paint"
+            tools:layout_editor_absoluteY="0dp" />
 
         <TextView
-            android:layout_margin="@dimen/tools_margin"
             android:id="@+id/btn_save_paint"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/tools_margin"
+            android:layout_marginStart="33dp"
+            android:layout_marginEnd="8dp"
             android:background="@drawable/btn_save"
-            />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/btn_clean_paint"
+            tools:layout_editor_absoluteY="0dp" />
 
-    </LinearLayout>
+    </android.support.constraint.ConstraintLayout>
 
     <TextView
         android:id="@+id/text_pen_size"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="画笔尺寸：10"
-        android:layout_marginTop="@dimen/text_paintsize_marginTop"
-        android:textSize="@dimen/textsize_paintsize"
         android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        />
+        android:layout_marginTop="8dp"
+        android:text="画笔尺寸：10"
+        android:textSize="@dimen/textsize_paintsize"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/constraintLayout2" />
 
     <SeekBar
-        android:layout_marginTop="@dimen/paint_size_marginTop"
         android:id="@+id/seekbar_pen_size"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
         android:max="19"
         android:progress="9"
-        />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toEndOf="@+id/text_pen_size"
+        app:layout_constraintTop_toBottomOf="@+id/constraintLayout2" />
 
     <View
-        android:layout_marginTop="@dimen/painter_line_marginTop"
+        android:id="@+id/view2"
         android:layout_width="match_parent"
         android:layout_height="3dp"
-        android:background="@drawable/line_top">
+        android:layout_marginTop="8dp"
+        android:background="@drawable/line_top"
+        app:layout_constraintTop_toBottomOf="@+id/seekbar_pen_size"
+        tools:layout_editor_absoluteX="0dp">
 
     </View>
 
 
     <LinearLayout
         android:id="@+id/paint_linear"
-        android:layout_marginTop="@dimen/painter_marginTop"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
         android:orientation="horizontal"
-        >
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/view2"
+        tools:layout_editor_absoluteX="0dp">
 
     </LinearLayout>
 
-</FrameLayout>
+</android.support.constraint.ConstraintLayout>

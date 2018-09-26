@@ -10,6 +10,7 @@ import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.constraint.ConstraintLayout;
 import android.view.Display;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -56,7 +57,7 @@ public class Painter_activity extends Activity implements OnClickListener {
     private TextView btnSavePaint;
     private TextView text_pen_size;
     private PaintView paintViewPad;
-    private FrameLayout framelayoutPaint;
+    private ConstraintLayout constraintLayout;
     private LinearLayout paint_linear;
     private SeekBar seekBar_pen_size;
 
@@ -129,17 +130,17 @@ public class Painter_activity extends Activity implements OnClickListener {
 
     public void initView() {
 //        实例化控件
-        btnSavePaint = (TextView) findViewById(R.id.btn_save_paint);
-        btnRevokePaint = (TextView) findViewById(R.id.btn_revoke_paint);
-        btnRedoPaint = (TextView) findViewById(R.id.btn_redo_paint);
-        btnCleanPaint = (TextView) findViewById(R.id.btn_clean_paint);
-        btnPenStylePaint = (ImageView) findViewById(R.id.btn_pen_style_paint);
-        btnPenColorPaint = (TextView) findViewById(R.id.btn_pen_color_paint);
-        btnBackPaint = (TextView) findViewById(R.id.btn_back_paint);
-        text_pen_size = (TextView) findViewById(R.id.text_pen_size);
-        framelayoutPaint = (FrameLayout) findViewById(R.id.framelayout_paint);
-        seekBar_pen_size = (SeekBar) findViewById(R.id.seekbar_pen_size);
-        paint_linear = (LinearLayout) findViewById(R.id.paint_linear);
+        btnSavePaint = findViewById(R.id.btn_save_paint);
+        btnRevokePaint = findViewById(R.id.btn_revoke_paint);
+        btnRedoPaint = findViewById(R.id.btn_redo_paint);
+        btnCleanPaint = findViewById(R.id.btn_clean_paint);
+        btnPenStylePaint = findViewById(R.id.btn_pen_style_paint);
+        btnPenColorPaint =  findViewById(R.id.btn_pen_color_paint);
+        btnBackPaint = findViewById(R.id.btn_back_paint);
+        text_pen_size = findViewById(R.id.text_pen_size);
+        constraintLayout = findViewById(R.id.framelayout_paint);
+        seekBar_pen_size =  findViewById(R.id.seekbar_pen_size);
+        paint_linear = findViewById(R.id.paint_linear);
 
         btnSavePaint.setOnClickListener(this);
         btnRevokePaint.setOnClickListener(this);

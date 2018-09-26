@@ -21,50 +21,48 @@
 
     <com.getbase.floatingactionbutton.FloatingActionsMenu
         android:id="@+id/btn_newone"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginRight="@dimen/FloatingActionButton_margin"
+        android:layout_width="126dp"
+        android:layout_height="0dp"
+        android:layout_marginEnd="@dimen/FloatingActionButton_margin"
         android:layout_marginBottom="@dimen/FloatingActionButton_margin"
         app:fab_addButtonColorNormal="@color/colorAccent"
         app:fab_addButtonColorPressed="@color/colorAccent"
         app:fab_addButtonSize="normal"
+        app:fab_labelStyle="@style/menu_labels_style"
         app:layout_constraintBottom_toTopOf="@+id/navigation"
         app:layout_constraintEnd_toEndOf="@+id/view3"
-        app:fab_labelStyle="@style/menu_labels_style"
+        android:soundEffectsEnabled="false"
         >
 
         <com.getbase.floatingactionbutton.FloatingActionButton
-            app:fab_title="文字"
             android:id="@+id/fab_new_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            app:fab_size="mini"
+            app:fab_title="文字"
             fab:fab_colorNormal="@color/white"
             fab:fab_colorPressed="@color/white"
-            app:fab_size="mini"
-            fab:fab_icon="@drawable/btn_text"
-            />
+            fab:fab_icon="@drawable/btn_text" />
 
         <com.getbase.floatingactionbutton.FloatingActionButton
-            app:fab_title="涂鸦"
             android:id="@+id/fab_new_paint"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            app:fab_size="mini"
+            app:fab_title="涂鸦"
             fab:fab_colorNormal="@color/white"
             fab:fab_colorPressed="@color/white"
-            app:fab_size="mini"
-            fab:fab_icon="@drawable/btn_paint"
-            />
+            fab:fab_icon="@drawable/btn_paint" />
 
         <com.getbase.floatingactionbutton.FloatingActionButton
-            app:fab_title="录音"
             android:id="@+id/fab_new_record"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            app:fab_size="mini"
+            app:fab_title="录音"
             fab:fab_colorNormal="@color/white"
             fab:fab_colorPressed="@color/white"
-            app:fab_size="mini"
-            fab:fab_icon="@drawable/btn_record"
-            />
+            fab:fab_icon="@drawable/btn_record" />
 
     </com.getbase.floatingactionbutton.FloatingActionsMenu>
 

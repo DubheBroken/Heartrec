@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="tools_margin">9dp</dimen>
+    <dimen name="text_paintsize_marginTop">60dp</dimen>
+    <dimen name="paint_size_marginTop">70dp</dimen>
+    <dimen name="painter_line_marginTop">100dp</dimen>
+    <dimen name="painter_marginTop">107dp</dimen>
+    <dimen name="textsize_paintsize">10sp</dimen>
+    <dimen name="FloatingActionButton_margin">32dp</dimen>
+    <dimen name="FloatingActionButton_size">80dp</dimen>
+    <dimen name="bottomButton_size">56dp</dimen>
+    <dimen name="bottomText_size">15sp</dimen>
+    <dimen name="bottomFragment_marginBottom">2dp</dimen>
+    <dimen name="popwindow_marginBottom">-760px</dimen>
+    <dimen name="popwindow_marginLeft">-12px</dimen>
+    <dimen name="dialog_height">480px</dimen>
+    <dimen name="colorButton_margin">40dp</dimen>
+    <dimen name="colorButton_marginFirst">48dp</dimen>
+    <dimen name="colorPicker_marginTop">102dp</dimen>
+    <dimen name="dialog_verticalMargin">0px</dimen>
+	
+	<dimen name="fab_size_normal">56dp</dimen>
+    <dimen name="fab_size_mini">40dp</dimen>
+
+    <dimen name="fab_icon_size">24dp</dimen>
+
+    <dimen name="fab_plus_icon_size">14dp</dimen>
+    <dimen name="fab_plus_icon_stroke">2dp</dimen>
+
+    <dimen name="fab_shadow_offset">3dp</dimen>
+    <dimen name="fab_shadow_radius">9dp</dimen>
+
+    <dimen name="fab_stroke_width">1dp</dimen>
+
+    <dimen name="fab_actions_spacing">8dp</dimen>
+    <dimen name="fab_labels_margin">8dp</dimen>
+</resources>
