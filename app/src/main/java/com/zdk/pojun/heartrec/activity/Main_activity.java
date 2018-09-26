@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Canvas;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
@@ -16,6 +17,11 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.OrientationHelper;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -23,17 +29,17 @@ import android.view.View.OnClickListener;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AdapterView;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.getbase.floatingactionbutton.FloatingActionButton;
+import com.getbase.floatingactionbutton.FloatingActionsMenu;
 import com.zdk.pojun.heartrec.AppData;
 import com.zdk.pojun.heartrec.R;
 import com.zdk.pojun.heartrec.adapter.Paint_Adapter;
 import com.zdk.pojun.heartrec.adapter.Record_Adapter;
-import com.zdk.pojun.heartrec.custom.CustomPopwindow;
+import com.zdk.pojun.heartrec.custom.RecyclerViewSpacesItemDecoration;
+import com.zdk.pojun.heartrec.custom.SpaceItemDecoration;
 import com.zdk.pojun.heartrec.entity.Paint_Entity;
 import com.zdk.pojun.heartrec.entity.Record_Entity;
 import com.zdk.pojun.heartrec.utils.Constant;
@@ -42,17 +48,17 @@ import com.zdk.pojun.heartrec.adapter.Text_Adapter;
 import com.zdk.pojun.heartrec.entity.Text_Entity;
 import com.zdk.pojun.heartrec.utils.SqliteHelper;
 import com.readystatesoftware.systembartint.SystemBarTintManager;
-import com.getbase.floatingactionbutton.FloatingActionButton;
+
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import floatingactionbutton.FloatingActionsMenu;
 
 /**
  * Created by Zero on 2017/2/15.
@@ -74,7 +80,7 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
     private ExecutorService cacheThreadPool;
     private boolean running = true;
 
-    private ListView listView;
+    private RecyclerView recyclerView;
     private Text_Adapter textAdapter;
     private Paint_Adapter paintAdapter;
     private Record_Adapter recordAdapter;
@@ -183,7 +189,7 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
                         }
                         initView();
                         initAdapter(2);
-                        listView.setAdapter(paintAdapter);
+                        recyclerView.setAdapter(paintAdapter);
                     }
                 })
                 .setNegativeButton("取消", new DialogInterface.OnClickListener() {
@@ -295,15 +301,19 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
      */
     private void initView() {
 //        实例化控件
-        listView = (ListView) findViewById(R.id.itemlist);
-        FAB_new_one = (FloatingActionsMenu) findViewById(R.id.btn_newone);
-        fab_text = (FloatingActionButton) findViewById(R.id.fab_new_text);
-        fab_paint = (FloatingActionButton) findViewById(R.id.fab_new_paint);
-        fab_record = (FloatingActionButton) findViewById(R.id.fab_new_record);
-        navigation = (BottomNavigationView) findViewById(R.id.navigation);
+        recyclerView = findViewById(R.id.itemlist);
+        FAB_new_one = findViewById(R.id.btn_newone);
+        fab_text = findViewById(R.id.fab_new_text);
+        fab_paint = findViewById(R.id.fab_new_paint);
+        fab_record = findViewById(R.id.fab_new_record);
+        navigation = findViewById(R.id.navigation);
 
         cacheThreadPool = Executors.newCachedThreadPool();
         initAdapter(1);
+
+
+//        mRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));//这里用线性宫格显示 类似于grid view
+//        mRecyclerView.setLayoutManager(new StaggeredGridLayoutManager(2, OrientationHelper.VERTICAL));//这里用线性宫格显示 类似于瀑布流
 
         //        点击监听
         FAB_new_one.setOnClickListener(this);
@@ -371,32 +381,16 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
                 }
                 db.close();//关闭数据库
                 textAdapter = new Text_Adapter(this, listText);
-                listView.setAdapter(textAdapter);
-
-                //    item点击事件
-                listView.setOnItemClickListener((new AdapterView.OnItemClickListener() {
-
-                            @Override
-                            public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
-                                                    long arg3) {
-                                // TODO Auto-generated method stub);
-                                Intent intent = new Intent(Main_activity.this, NewOne_activity.class);
-                                intent.putExtra("id", listText.get(arg2).getId());//将被点击的item id传递到新活动
-                                startActivity(intent);
-                            }
-                        })
-                );
-//        item长按事件
-                listView.setOnItemLongClickListener((new AdapterView.OnItemLongClickListener() {
-
+                recyclerView.setLayoutManager(new LinearLayoutManager(this,LinearLayoutManager.VERTICAL, false));
+                textAdapter.setItemListener(new Text_Adapter.onRecyclerItemClickerListener(){
                     @Override
-                    public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2,
-                                                   long arg3) {
-                        showDeleteTextDia(listText.get(arg2).getId());
-                        return true;
+                    public void onRecyclerItemClick(View view, Object data, int position) {
+                        Intent intent = new Intent(Main_activity.this, NewOne_activity.class);
+                        intent.putExtra("id", listText.get(position).getId());//将被点击的item id传递到新活动
+                        startActivity(intent);
                     }
-                }));
-                listView.setAdapter(textAdapter);
+                });
+                recyclerView.setAdapter(textAdapter);
                 break;
             case 2:
                 //初始化图片适配器
@@ -404,30 +398,18 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
                 getImage(listPaint);
                 paintAdapter = new Paint_Adapter(this, listPaint);
 
-                //    item点击事件
-                listView.setOnItemClickListener((new AdapterView.OnItemClickListener() {
+                recyclerView.setLayoutManager(new GridLayoutManager(this,3));
 
-                            @Override
-                            public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
-                                                    long arg3) {
-                                // TODO Auto-generated method stub);
-                                Intent intent = new Intent(Main_activity.this, Painter_activity.class);
-                                intent.putExtra("fileName", listPaint.get(arg2).getFilename());//将被点击的item文件名传递到新活动
-                                startActivity(intent);
-                            }
-                        })
-                );
-//        item长按事件
-                listView.setOnItemLongClickListener((new AdapterView.OnItemLongClickListener() {
-
+                paintAdapter.setItemListener(new Paint_Adapter.onRecyclerItemClickerListener() {
                     @Override
-                    public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2,
-                                                   long arg3) {
-                        showDeleteImageDia(listPaint.get(arg2).getFilename());
-                        return true;
+                    public void onRecyclerItemClick(View view, Object data, int position) {
+                        Intent intent = new Intent(Main_activity.this, Painter_activity.class);
+                        intent.putExtra("fileName", listPaint.get(position).getFilename());//将被点击的item文件名传递到新活动
+                        startActivity(intent);
                     }
-                }));
-                listView.setAdapter(paintAdapter);
+                });
+
+                recyclerView.setAdapter(paintAdapter);
                 break;
             case 3:
                 //初始化录音适配器
@@ -435,93 +417,75 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
                 getRecord(listRecord);
                 recordAdapter = new Record_Adapter(this, listRecord);
 
+                recyclerView.setLayoutManager(new LinearLayoutManager(this,LinearLayoutManager.VERTICAL, false));
                 viewHolderList = recordAdapter.getViewHolderList();
-
-                //    item点击事件
-                listView.setOnItemClickListener((new AdapterView.OnItemClickListener() {
-
-                            @Override
-                            public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
-                                                    long arg3) {
-                                // TODO Auto-generated method stub);
-                                final Record_Adapter.ViewHolder viewHolder = viewHolderList.get(arg2);
-                                if (player != null && isPlaying && arg2 != playingItem) {
-                                    stop();
+                recordAdapter.setItemListener(new Record_Adapter.onRecyclerItemClickerListener() {
+                    @Override
+                    public void onRecyclerItemClick(View view, Object data, int position) {
+                        final Record_Adapter.ViewHolder viewHolder = viewHolderList.get(position);
+                        if (player != null && isPlaying && position != playingItem) {
+                            stop();
+                            player = null;
+                            loopThread.interrupt();
+                            running = false;
+                        }
+                        for (int i = 0; i < viewHolderList.size(); i++) {
+                            TextView image = viewHolderList.get(i).image;
+                            TextView time = viewHolderList.get(i).time;
+                            image.setBackgroundResource(R.drawable.btn_play);
+                            time.setBackgroundResource(R.drawable.bg_player_normal);
+                        }
+                        if (player == null) {
+                            if (Build.VERSION.SDK_INT < 23) {
+                                player = MediaPlayer.create(Main_activity.this, Uri.parse("/mnt/" + listRecord.get(position).getFilename()));
+                            } else {
+                                player = new MediaPlayer();
+                                String uri = "/mnt/" + listRecord.get(position).getFilename();
+                                File file = new File(uri);
+                                try {
+                                    FileInputStream fis = new FileInputStream(file);
+                                    player.setDataSource(fis.getFD());
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                            player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                                @Override
+                                public void onCompletion(MediaPlayer mp) {
+                                    isPlaying = false;
                                     player = null;
                                     loopThread.interrupt();
                                     running = false;
-                                }
-                                for (int i = 0; i < viewHolderList.size(); i++) {
-                                    TextView image = viewHolderList.get(i).image;
-                                    TextView time = viewHolderList.get(i).time;
-                                    image.setBackgroundResource(R.drawable.btn_play);
-                                    time.setBackgroundResource(R.drawable.bg_player_normal);
-                                }
-                                if (player == null) {
-                                    if (Build.VERSION.SDK_INT < 23) {
-                                        player = MediaPlayer.create(Main_activity.this, Uri.parse("/mnt/" + listRecord.get(arg2).getFilename()));
-                                    } else {
-                                        player = new MediaPlayer();
-                                        String uri = "/mnt/" + listRecord.get(arg2).getFilename();
-                                        File file = new File(uri);
-                                        try {
-                                            FileInputStream fis = new FileInputStream(file);
-                                            player.setDataSource(fis.getFD());
-                                        } catch (IOException e) {
-                                            e.printStackTrace();
-                                        }
-                                    }
-                                    player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                                        @Override
-                                        public void onCompletion(MediaPlayer mp) {
-                                            isPlaying = false;
-                                            player = null;
-                                            loopThread.interrupt();
-                                            running = false;
-                                            viewHolder.image.setBackgroundResource(R.drawable.btn_play);
-                                            viewHolder.time.setBackgroundResource(R.drawable.bg_player_normal);
-                                            playingItem = -1;
-                                        }
-                                    });
-                                }
-                                if (isPlaying) {
-                                    stop();
-                                    player = null;
-                                    loopThread.interrupt();
-                                    running = false;
-                                    playingItem = -1;
                                     viewHolder.image.setBackgroundResource(R.drawable.btn_play);
                                     viewHolder.time.setBackgroundResource(R.drawable.bg_player_normal);
-                                } else {
-                                    start();
-                                    if (isPlaying) {
-                                        viewHolder.image.setBackgroundResource(R.drawable.btn_pause);
-                                        running = true;
-                                        if (!runed || playingItem == -1) {
-                                            updateSeekBar();
-                                        }
-                                        playingItem = arg2;
-                                    } else {
-                                        player = null;
-                                    }
+                                    playingItem = -1;
                                 }
-
+                            });
+                        }
+                        if (isPlaying) {
+                            stop();
+                            player = null;
+                            loopThread.interrupt();
+                            running = false;
+                            playingItem = -1;
+                            viewHolder.image.setBackgroundResource(R.drawable.btn_play);
+                            viewHolder.time.setBackgroundResource(R.drawable.bg_player_normal);
+                        } else {
+                            start();
+                            if (isPlaying) {
+                                viewHolder.image.setBackgroundResource(R.drawable.btn_pause);
+                                running = true;
+                                if (!runed || playingItem == -1) {
+                                    updateSeekBar();
+                                }
+                                playingItem = position;
+                            } else {
+                                player = null;
                             }
-                        })
-
-
-                );
-//        item长按事件
-                listView.setOnItemLongClickListener((new AdapterView.OnItemLongClickListener() {
-
-                    @Override
-                    public boolean onItemLongClick(AdapterView<?> arg0, View arg1, int arg2,
-                                                   long arg3) {
-                        showDeleteRecordDia(listRecord.get(arg2).getFilename());
-                        return true;
+                        }
                     }
-                }));
-                listView.setAdapter(recordAdapter);
+                });
+                recyclerView.setAdapter(recordAdapter);
                 break;
         }
 

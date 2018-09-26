@@ -243,3 +243,11 @@ TODO:模仿谷歌最新设计风格的沉浸式体验
 TODO:引入侧栏和设置界面
 TODO:添加Keep式界面
 ——————————————————————————————————————————————————————
+2018年9月26日13时   Android 8.0 API 26——API 19
+替换ListView为RecyclerView
+FloatingButton新增文字
+主界面的根布局替换为ConstraintLayout
+
+问题：RecyclerView无法点击
+
+TODO:性能优化（加载数据太慢）

@@ -1,49 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_height="match_parent"
-    android:layout_width="match_parent"
+<android.support.v7.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="wrap_content"
+    android:layout_width="wrap_content"
     android:orientation="vertical"
+    android:layout_margin="16dp"
     >
 
         <LinearLayout
             android:id="@+id/paint_layout_item"
-            android:layout_marginLeft="4dp"
             android:layout_gravity="center"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
+            android:orientation="vertical"
             >
 
                 <ImageView
-                    android:layout_gravity="center_vertical"
                     android:id="@+id/paint_item_image"
-                    android:layout_height="56dp"
-                    android:layout_width="56dp"
-                    />
-
-                <TextView
-                    android:layout_weight="1"
-                    android:gravity="right|center_vertical"
-                    android:id="@+id/paint_item_time"
-                    android:layout_height="match_parent"
-                    android:layout_width="match_parent"
-                    android:text="@string/time"
-                    android:textColor="@color/meantext"
-                    android:textSize="@dimen/textsize_paintsize"/>
-
-                <TextView
-                    android:id="@+id/paint_item_imgbtn_arrow"
-                    android:contentDescription="展开"
-                    android:layout_marginTop="14dp"
-                    android:layout_gravity="top"
-                    android:layout_weight="0"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/img_arrow"
-                    />
+                    android:layout_gravity="center_vertical" />
+
+                <TextView
+                    android:id="@+id/paint_item_time"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:text="@string/time"
+                    android:textAlignment="center"
+                    android:textAllCaps="false"
+                    android:textColor="@color/black"
+                    android:textSize="@dimen/textsize_paintsize" />
 
         </LinearLayout>
 
-
-
-</LinearLayout>
+</android.support.v7.widget.CardView>

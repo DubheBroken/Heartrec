@@ -6,8 +6,8 @@
     <dimen name="painter_line_marginTop">100dp</dimen>
     <dimen name="painter_marginTop">107dp</dimen>
     <dimen name="textsize_paintsize">10sp</dimen>
-    <dimen name="FloatingActionButton_margin">36dp</dimen>
-    <dimen name="FloatingActionButton_size">64dp</dimen>
+    <dimen name="FloatingActionButton_margin">32dp</dimen>
+    <dimen name="FloatingActionButton_size">80dp</dimen>
     <dimen name="bottomButton_size">56dp</dimen>
     <dimen name="bottomText_size">15sp</dimen>
     <dimen name="bottomFragment_marginBottom">2dp</dimen>

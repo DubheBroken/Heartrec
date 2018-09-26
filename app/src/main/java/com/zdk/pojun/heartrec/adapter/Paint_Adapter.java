@@ -2,9 +2,10 @@ package com.zdk.pojun.heartrec.adapter;
 
 import android.content.Context;
 import android.net.Uri;
+import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -21,10 +22,11 @@ import java.util.List;
  * Created by Developer on 2017/7/3.
  */
 
-public class Paint_Adapter extends BaseAdapter {
+public class Paint_Adapter extends RecyclerView.Adapter<Paint_Adapter.ViewHolder> {
 
     private Context context;
     private List<Paint_Entity> list;
+    private onRecyclerItemClickerListener clickerListener;
 
     public Paint_Adapter(Main_activity mainActivity, List<Paint_Entity> list) {
         this.context = mainActivity;
@@ -32,13 +34,25 @@ public class Paint_Adapter extends BaseAdapter {
     }
 
     @Override
-    public int getCount() {
-        return list.size();
+    public void onBindViewHolder(ViewHolder holder, int position) {
+//                处理时间字符串
+        String time = list.get(position).getTime();
+        time = time.substring(5, time.length());
+        SimpleDateFormat oldFormatter = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
+        SimpleDateFormat newFormatter = new SimpleDateFormat("yyyy年MM月dd日 HH:mm");
+        time = timeFormatter(time, oldFormatter, newFormatter);
+
+        //给控件赋值
+        holder.time.setText(time);
+        holder.image.setImageURI(Uri.parse((list.get(position).getFilename())));
+
+        final ViewHolder finalHolder = holder;
+        final LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) finalHolder.image.getLayoutParams();
     }
 
     @Override
-    public Object getItem(int i) {
-        return list.get(i);
+    public int getItemCount() {
+        return list.size();
     }
 
     @Override
@@ -47,71 +61,48 @@ public class Paint_Adapter extends BaseAdapter {
     }
 
     @Override
-    public View getView(int i, View view, ViewGroup viewGroup) {
-        ViewHolder holder = null;
-        if (view == null) {
-            holder = new ViewHolder();
-            //引入布局
-            view = View.inflate(context, R.layout.paint_item_layout, null);
-            //实例化对象
-            holder.layout = (LinearLayout) view.findViewById(R.id.paint_layout_item);
-            holder.time = (TextView) view.findViewById(R.id.paint_item_time);
-            holder.image = (ImageView) view.findViewById(R.id.paint_item_image);
-            holder.imgbtn_arrow = (TextView) view.findViewById(R.id.paint_item_imgbtn_arrow);
-
-            view.setTag(holder);
-        } else {
-            holder = (ViewHolder) view.getTag();
-        }
-
-//        处理时间字符串
-        String time = list.get(i).getTime();
-        time = time.substring(5, time.length());
-        SimpleDateFormat oldFormatter = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
-        SimpleDateFormat newFormatter = new SimpleDateFormat("yyyy年MM月dd日 HH:mm");
-        time = timeFormatter(time, oldFormatter, newFormatter);
-
-
-        //给控件赋值
-        holder.time.setText(time);
-        holder.image.setImageURI(Uri.parse((list.get(i).getFilename())));
-
-        final ViewHolder finalHolder = holder;
-        final LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) finalHolder.image.getLayoutParams();
-        final int width = params.width;
-        final int height = params.height;
-        holder.imgbtn_arrow.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                switch (v.getId()) {
-                    case R.id.paint_item_imgbtn_arrow:
-//                        v.startAnimation(AnimationUtils.loadAnimation(context,R.anim.rotate90));//旋转动画，时间不同步弃用
-                        switch (v.getBackground().getLevel()) {
-                            case 0:
-                                v.getBackground().setLevel(1);
-                                params.width = ViewGroup.LayoutParams.WRAP_CONTENT;
-                                params.height = ViewGroup.LayoutParams.WRAP_CONTENT;
-                                finalHolder.image.setLayoutParams(params);
-                                break;
-                            case 1:
-                                v.getBackground().setLevel(0);
-                                params.width = width;
-                                params.height = height;
-                                finalHolder.image.setLayoutParams(params);
-                                break;
-                        }
-                        break;
-                }
-            }
-        });
-        return view;
+    public void onBindViewHolder(ViewHolder holder, int position, List<Object> payloads) {
+        super.onBindViewHolder(holder, position, payloads);
     }
 
-    private class ViewHolder {
+    @Override
+    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(context).inflate(R.layout.paint_item_layout, parent, false);
+        return new ViewHolder(view);
+    }
+
+    public void setItemListener(onRecyclerItemClickerListener listener) {
+        this.clickerListener = listener;
+    }
+
+    /**
+     * 点击监听回调接口
+     */
+    public interface onRecyclerItemClickerListener {
+        void onRecyclerItemClick(View view, Object data, int position);
+    }
+
+    private View.OnClickListener getOnClickListener(final int position) {
+        return new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (null != clickerListener && null != v) {
+                    clickerListener.onRecyclerItemClick(v, list.get(position), position);
+                }
+            }
+        };
+    }
+
+    class ViewHolder extends RecyclerView.ViewHolder {
+        private ViewHolder(View itemView) {
+            super(itemView);
+            layout = itemView.findViewById(R.id.paint_layout_item);
+            time = itemView.findViewById(R.id.paint_item_time);
+            image =  itemView.findViewById(R.id.paint_item_image);
+        }
         LinearLayout layout;
         TextView time;//时间
         ImageView image;//图片
-        TextView imgbtn_arrow;//箭头
     }
 
     /**
