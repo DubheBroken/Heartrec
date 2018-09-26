@@ -27,7 +27,9 @@ public class Record_Adapter extends RecyclerView.Adapter<Record_Adapter.ViewHold
     private Context context;
     private List<Record_Entity> list;
     private List<ViewHolder> viewHolderList;
-    private Record_Adapter.onRecyclerItemClickerListener clickerListener;
+    private OnItemClickListener onItemClickListener = null;
+    private OnItemLongClickListener onItemLongClickListener = null;
+
 
     public Record_Adapter(Main_activity mainActivity, List<Record_Entity> list) {
         this.context = mainActivity;
@@ -36,7 +38,7 @@ public class Record_Adapter extends RecyclerView.Adapter<Record_Adapter.ViewHold
     }
 
     @Override
-    public void onBindViewHolder(Record_Adapter.ViewHolder holder, int position) {
+    public void onBindViewHolder(Record_Adapter.ViewHolder holder, final int position) {
         //        处理时间字符串
         String time = list.get(position).getTime();
         time = time.substring(6, time.length());
@@ -46,6 +48,29 @@ public class Record_Adapter extends RecyclerView.Adapter<Record_Adapter.ViewHold
 
         //给控件赋值
         holder.time.setText(time);
+
+
+        //通过为条目设置点击事件触发回调
+        if (onItemClickListener != null) {
+            holder.layout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    onItemClickListener.onItemClick(view, position);
+                }
+            });
+        }
+
+        if (onItemLongClickListener != null) {
+            holder.layout.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    if (onItemLongClickListener != null)
+                        onItemLongClickListener.onItemLongClick(v, position);
+                    return false;
+                }
+            });
+        }
+        viewHolderList.add(holder);
     }
 
     @Override
@@ -64,68 +89,32 @@ public class Record_Adapter extends RecyclerView.Adapter<Record_Adapter.ViewHold
         return new Record_Adapter.ViewHolder(view);
     }
 
-    public void setItemListener(Record_Adapter.onRecyclerItemClickerListener listener) {
-        this.clickerListener = listener;
+    //设置回调接口
+    public interface OnItemClickListener {
+        void onItemClick(View view, int position);
     }
 
-    /**
-     * 点击监听回调接口
-     */
-    public interface onRecyclerItemClickerListener {
-        void onRecyclerItemClick(View view, Object data, int position);
+    public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
+        this.onItemClickListener = onItemClickListener;
     }
 
-    private View.OnClickListener getOnClickListener(final int position) {
-        return new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (null != clickerListener && null != v) {
-                    clickerListener.onRecyclerItemClick(v, list.get(position), position);
-                }
-            }
-        };
+    //设置回调接口
+    public interface OnItemLongClickListener {
+        void onItemLongClick(View view, int position);
     }
+
+    public void setOnItemLongClickListener(OnItemLongClickListener onItemLongClickListener) {
+        this.onItemLongClickListener = onItemLongClickListener;
+    }
+
     @Override
     public long getItemId(int i) {
         return i;
     }
 
-    public List<ViewHolder> getViewHolderList(){
+    public List<ViewHolder> getViewHolderList() {
         return this.viewHolderList;
     }
-
-//    @Override
-//    public View getView(int i, View view, ViewGroup viewGroup) {
-//        ViewHolder holder = null;
-//        if (view == null) {
-//            holder = new ViewHolder();
-//            //引入布局
-//            view = View.inflate(context, R.layout.record_item_layout, null);
-//            //实例化对象
-//            holder.layout = (LinearLayout) view.findViewById(R.id.record_layout_item);
-//            holder.time = (TextView) view.findViewById(R.id.record_item_time);
-//            holder.image = (TextView) view.findViewById(R.id.record_item_play);
-//
-//            viewHolderList.add(holder);
-//            view.setTag(holder);
-//        } else {
-//            holder = (ViewHolder) view.getTag();
-//        }
-//
-////        处理时间字符串
-//        String time = list.get(i).getTime();
-//        time = time.substring(6, time.length());
-//        SimpleDateFormat oldFormatter = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss");
-//        SimpleDateFormat newFormatter = new SimpleDateFormat("yyyy年MM月dd日 HH:mm");
-//        time = timeFormatter(time, oldFormatter, newFormatter);
-//
-//
-//        //给控件赋值
-//        holder.time.setText(time);
-//
-//        final ViewHolder finalHolder = holder;
-//        return view;
-//    }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
         private ViewHolder(View itemView) {
@@ -134,6 +123,7 @@ public class Record_Adapter extends RecyclerView.Adapter<Record_Adapter.ViewHold
             time = itemView.findViewById(R.id.record_item_time);
             image = itemView.findViewById(R.id.record_item_play);
         }
+
         public LinearLayout layout;
         public TextView time;//总时间
         public TextView image;//播放按钮

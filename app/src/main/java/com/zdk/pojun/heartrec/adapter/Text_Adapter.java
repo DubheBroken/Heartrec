@@ -22,7 +22,9 @@ public class Text_Adapter extends RecyclerView.Adapter<Text_Adapter.ViewHolder> 
 
     private Context context;
     private List<Text_Entity> list;
-    private Text_Adapter.onRecyclerItemClickerListener clickerListener;
+    private OnItemClickListener onItemClickListener = null;
+    private OnItemLongClickListener onItemLongClickListener = null;
+
 
     public Text_Adapter(Main_activity mainActivity, List<Text_Entity> list) {
         this.context = mainActivity;
@@ -30,7 +32,7 @@ public class Text_Adapter extends RecyclerView.Adapter<Text_Adapter.ViewHolder> 
     }
 
     @Override
-    public void onBindViewHolder(Text_Adapter.ViewHolder holder, int position) {
+    public void onBindViewHolder(Text_Adapter.ViewHolder holder, final int position) {
         //给控件赋值
         holder.time.setText(list.get(position).getTime());
         holder.substance.setText(list.get(position).getSubstance());
@@ -56,6 +58,27 @@ public class Text_Adapter extends RecyclerView.Adapter<Text_Adapter.ViewHolder> 
                 }
             }
         });
+
+        //通过为条目设置点击事件触发回调
+        if (onItemClickListener != null) {
+            holder.layout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    onItemClickListener.onItemClick(view,position);
+                }
+            });
+        }
+
+        if( onItemLongClickListener!=null) {
+            holder.layout.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    if (onItemLongClickListener != null)
+                        onItemLongClickListener.onItemLongClick(v, position);
+                    return false;
+                }
+            });
+        }
     }
 
     @Override
@@ -76,77 +99,30 @@ public class Text_Adapter extends RecyclerView.Adapter<Text_Adapter.ViewHolder> 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(context).inflate(R.layout.text_item_layout, parent, false);
+        ViewHolder viewHolder = new ViewHolder(view);
 
-        return new ViewHolder(view);
+
+        return viewHolder;
     }
 
-    public void setItemListener(Text_Adapter.onRecyclerItemClickerListener listener) {
-        this.clickerListener = listener;
+    //设置回调接口
+    public interface OnItemClickListener{
+        void onItemClick(View view, int position);
     }
 
-    /**
-     * 点击监听回调接口
-     */
-    public interface onRecyclerItemClickerListener {
-        void onRecyclerItemClick(View view, Object data, int position);
+    public void setOnItemClickListener(OnItemClickListener onItemClickListener){
+        this.onItemClickListener = onItemClickListener;
     }
 
-    private View.OnClickListener getOnClickListener(final int position) {
-        return new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (null != clickerListener && null != v) {
-                    clickerListener.onRecyclerItemClick(v, list.get(position), position);
-                }
-            }
-        };
+    //设置回调接口
+    public interface OnItemLongClickListener{
+        void onItemLongClick(View view, int position);
     }
 
-//    @Override
-//    public View getView(int i, View view, ViewGroup viewGroup) {
-//        ViewHolder holder = null;
-//        LinearLayout.LayoutParams linearParams = null;
-//        if (view == null) {
-//            holder = new ViewHolder();
-//            //引入布局
-//            view = View.inflate(context, R.layout.text_item_layout, null);
-//            //实例化对象
-//            holder.layout = (LinearLayout) view.findViewById(R.id.text_layout_item);
-//            holder.time = (TextView) view.findViewById(R.id.text_item_time);
-//            holder.substance = (TextView) view.findViewById(R.id.text_item_substance);
-//            holder.imgbtn_arrow = (TextView) view.findViewById(R.id.text_item_imgbtn_arrow);
-//
-//            view.setTag(holder);
-//        } else {
-//            holder = (ViewHolder) view.getTag();
-//        }
-//        //给控件赋值
-//        holder.time.setText(list.get(i).getTime());
-//        holder.substance.setText(list.get(i).getSubstance());
-//
-//        final ViewHolder finalHolder = holder;
-//        holder.imgbtn_arrow.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                switch (v.getId()) {
-//                    case R.id.text_item_imgbtn_arrow:
-////                        v.startAnimation(AnimationUtils.loadAnimation(context,R.anim.rotate90));//旋转动画，时间不同步弃用
-//                        switch (v.getBackground().getLevel()) {
-//                            case 0:
-//                                v.getBackground().setLevel(1);
-//                                finalHolder.substance.setMaxLines(20);
-//                                break;
-//                            case 1:
-//                                v.getBackground().setLevel(0);
-//                                finalHolder.substance.setMaxLines(1);
-//                                break;
-//                        }
-//                        break;
-//                }
-//            }
-//        });
-//        return view;
-//    }
+    public void setOnItemLongClickListener(OnItemLongClickListener onItemLongClickListener){
+        this.onItemLongClickListener = onItemLongClickListener;
+    }
+
 
     class ViewHolder extends RecyclerView.ViewHolder {
         private ViewHolder(View itemView) {

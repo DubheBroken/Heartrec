@@ -74,6 +74,7 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
     public boolean isPlaying = false;
     int playingItem = -1;//正在播放的项目，-1表示无
     private boolean runed = false;//是否允许过动画线程
+    private int page = 1;//当前页面
 
     private Runnable switchRunnable, loopRunnable, toNormalRunnable, recoverRunnable;
     private Thread loopThread;
@@ -88,7 +89,7 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
 
     //    注册控件
     private FloatingActionsMenu FAB_new_one;
-    private FloatingActionButton fab_text,fab_paint,fab_record;
+    private FloatingActionButton fab_text, fab_paint, fab_record;
     private BottomNavigationView navigation;
 
     @Override
@@ -280,20 +281,22 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
         Intent intent;
         switch (v.getId()) {
             case R.id.fab_new_text:
+                page = 1;
                 intent = new Intent(this, NewOne_activity.class);
                 startActivity(intent);
                 break;
             case R.id.fab_new_paint:
+                page = 2;
                 intent = new Intent(this, Painter_activity.class);
                 startActivity(intent);
                 break;
             case R.id.fab_new_record:
+                page = 3;
                 intent = new Intent(this, Record_activity.class);
                 startActivity(intent);
                 break;
         }
     }
-
 
 
     /**
@@ -309,7 +312,7 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
         navigation = findViewById(R.id.navigation);
 
         cacheThreadPool = Executors.newCachedThreadPool();
-        initAdapter(1);
+        initAdapter(page);
 
 
 //        mRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));//这里用线性宫格显示 类似于grid view
@@ -354,13 +357,14 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
         FAB_new_one.collapse();
         sqliteHelper = DbManager.getIntance(this);
         initView();
-        initAdapter(AppData.getFinalPage());
+        initAdapter(page);
     }
 
     /**
      * 初始化Adapter
      */
     private void initAdapter(int i) {
+        page = i;
         switch (i) {
             case 1:
 //                初始化文字适配器
@@ -381,13 +385,19 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
                 }
                 db.close();//关闭数据库
                 textAdapter = new Text_Adapter(this, listText);
-                recyclerView.setLayoutManager(new LinearLayoutManager(this,LinearLayoutManager.VERTICAL, false));
-                textAdapter.setItemListener(new Text_Adapter.onRecyclerItemClickerListener(){
+                recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+                textAdapter.setOnItemClickListener(new Text_Adapter.OnItemClickListener() {
                     @Override
-                    public void onRecyclerItemClick(View view, Object data, int position) {
+                    public void onItemClick(View view, int position) {
                         Intent intent = new Intent(Main_activity.this, NewOne_activity.class);
                         intent.putExtra("id", listText.get(position).getId());//将被点击的item id传递到新活动
                         startActivity(intent);
+                    }
+                });
+                textAdapter.setOnItemLongClickListener(new Text_Adapter.OnItemLongClickListener() {
+                    @Override
+                    public void onItemLongClick(View view, int position) {
+                        showDeleteTextDia(listText.get(position).getId());
                     }
                 });
                 recyclerView.setAdapter(textAdapter);
@@ -398,17 +408,22 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
                 getImage(listPaint);
                 paintAdapter = new Paint_Adapter(this, listPaint);
 
-                recyclerView.setLayoutManager(new GridLayoutManager(this,3));
+                recyclerView.setLayoutManager(new GridLayoutManager(this, 3));
 
-                paintAdapter.setItemListener(new Paint_Adapter.onRecyclerItemClickerListener() {
+                paintAdapter.setOnItemClickListener(new Paint_Adapter.OnItemClickListener() {
                     @Override
-                    public void onRecyclerItemClick(View view, Object data, int position) {
+                    public void onItemClick(View view, int position) {
                         Intent intent = new Intent(Main_activity.this, Painter_activity.class);
                         intent.putExtra("fileName", listPaint.get(position).getFilename());//将被点击的item文件名传递到新活动
                         startActivity(intent);
                     }
                 });
-
+                paintAdapter.setOnItemLongClickListener(new Paint_Adapter.OnItemLongClickListener() {
+                    @Override
+                    public void onItemLongClick(View view, int position) {
+                        showDeleteImageDia(listPaint.get(position).getFilename());
+                    }
+                });
                 recyclerView.setAdapter(paintAdapter);
                 break;
             case 3:
@@ -416,12 +431,11 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
                 listRecord = new ArrayList<>();
                 getRecord(listRecord);
                 recordAdapter = new Record_Adapter(this, listRecord);
-
-                recyclerView.setLayoutManager(new LinearLayoutManager(this,LinearLayoutManager.VERTICAL, false));
+                recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
                 viewHolderList = recordAdapter.getViewHolderList();
-                recordAdapter.setItemListener(new Record_Adapter.onRecyclerItemClickerListener() {
+                recordAdapter.setOnItemClickListener(new Record_Adapter.OnItemClickListener() {
                     @Override
-                    public void onRecyclerItemClick(View view, Object data, int position) {
+                    public void onItemClick(View view, int position) {
                         final Record_Adapter.ViewHolder viewHolder = viewHolderList.get(position);
                         if (player != null && isPlaying && position != playingItem) {
                             stop();
@@ -483,6 +497,13 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
                                 player = null;
                             }
                         }
+                    }
+                });
+
+                recordAdapter.setOnItemLongClickListener(new Record_Adapter.OnItemLongClickListener() {
+                    @Override
+                    public void onItemLongClick(View view, int position) {
+                        showDeleteRecordDia(listRecord.get(position).getFilename());
                     }
                 });
                 recyclerView.setAdapter(recordAdapter);
@@ -608,7 +629,7 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
         super.onRestart();
         sqliteHelper = DbManager.getIntance(this);
         initView();
-        initAdapter(AppData.getFinalPage());
+        initAdapter(page);
     }
 
     private void getImage(List<Paint_Entity> list) {

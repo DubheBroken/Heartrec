@@ -26,7 +26,9 @@ public class Paint_Adapter extends RecyclerView.Adapter<Paint_Adapter.ViewHolder
 
     private Context context;
     private List<Paint_Entity> list;
-    private onRecyclerItemClickerListener clickerListener;
+    private OnItemClickListener onItemClickListener = null;
+    private OnItemLongClickListener onItemLongClickListener = null;
+
 
     public Paint_Adapter(Main_activity mainActivity, List<Paint_Entity> list) {
         this.context = mainActivity;
@@ -34,7 +36,7 @@ public class Paint_Adapter extends RecyclerView.Adapter<Paint_Adapter.ViewHolder
     }
 
     @Override
-    public void onBindViewHolder(ViewHolder holder, int position) {
+    public void onBindViewHolder(ViewHolder holder, final int position) {
 //                处理时间字符串
         String time = list.get(position).getTime();
         time = time.substring(5, time.length());
@@ -48,6 +50,27 @@ public class Paint_Adapter extends RecyclerView.Adapter<Paint_Adapter.ViewHolder
 
         final ViewHolder finalHolder = holder;
         final LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) finalHolder.image.getLayoutParams();
+
+        //通过为条目设置点击事件触发回调
+        if (onItemClickListener != null) {
+            holder.layout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    onItemClickListener.onItemClick(view,position);
+                }
+            });
+        }
+
+        if( onItemLongClickListener!=null) {
+            holder.layout.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    if (onItemLongClickListener != null)
+                        onItemLongClickListener.onItemLongClick(v, position);
+                    return false;
+                }
+            });
+        }
     }
 
     @Override
@@ -71,27 +94,25 @@ public class Paint_Adapter extends RecyclerView.Adapter<Paint_Adapter.ViewHolder
         return new ViewHolder(view);
     }
 
-    public void setItemListener(onRecyclerItemClickerListener listener) {
-        this.clickerListener = listener;
+    //设置回调接口
+    public interface OnItemClickListener{
+        void onItemClick(View view, int position);
     }
 
-    /**
-     * 点击监听回调接口
-     */
-    public interface onRecyclerItemClickerListener {
-        void onRecyclerItemClick(View view, Object data, int position);
+    public void setOnItemClickListener(OnItemClickListener onItemClickListener){
+        this.onItemClickListener = onItemClickListener;
     }
 
-    private View.OnClickListener getOnClickListener(final int position) {
-        return new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (null != clickerListener && null != v) {
-                    clickerListener.onRecyclerItemClick(v, list.get(position), position);
-                }
-            }
-        };
+    //设置回调接口
+    public interface OnItemLongClickListener{
+        void onItemLongClick(View view, int position);
     }
+
+    public void setOnItemLongClickListener(OnItemLongClickListener onItemLongClickListener){
+        this.onItemLongClickListener = onItemLongClickListener;
+    }
+
+
 
     class ViewHolder extends RecyclerView.ViewHolder {
         private ViewHolder(View itemView) {
