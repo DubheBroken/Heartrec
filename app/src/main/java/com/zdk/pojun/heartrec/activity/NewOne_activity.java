@@ -11,6 +11,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.constraint.ConstraintLayout;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
@@ -47,7 +48,7 @@ public class NewOne_activity extends Activity implements OnClickListener {
     //    注册控件
     private EditText editText_substance;
     private TextView textView_time, btn_save, btn_cancel;
-    private LinearLayout layout;
+    private ConstraintLayout layout;
 
     //    数据变量
     private String nowtime, substance;
@@ -125,11 +126,11 @@ public class NewOne_activity extends Activity implements OnClickListener {
         sqliteHelper = DbManager.getIntance(this);
 //        option_helper = new OptionHelper(context);
         //        实例化控件
-        editText_substance = (EditText) findViewById(R.id.edittext_substance);
-        btn_save = (TextView) findViewById(R.id.btn_save);
-        btn_cancel = (TextView) findViewById(R.id.btn_cancel);
-        textView_time = (TextView) findViewById(R.id.text_time);
-        layout = (LinearLayout) findViewById(R.id.layout_newone);
+        editText_substance = findViewById(R.id.edittext_substance);
+        btn_save = findViewById(R.id.btn_save);
+        btn_cancel = findViewById(R.id.btn_cancel);
+        textView_time = findViewById(R.id.text_time);
+        layout = findViewById(R.id.layout_newone);
 
 //        点击监听
         btn_save.setOnClickListener(this);

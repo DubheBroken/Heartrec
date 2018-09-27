@@ -1,6 +1,7 @@
 package com.zdk.pojun.heartrec.activity;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -11,6 +12,8 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 
+import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.ActivityCompat;
@@ -42,7 +45,6 @@ import com.zdk.pojun.heartrec.adapter.Text_Adapter;
 import com.zdk.pojun.heartrec.entity.Text_Entity;
 import com.zdk.pojun.heartrec.utils.SqliteHelper;
 import com.readystatesoftware.systembartint.SystemBarTintManager;
-
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -84,6 +86,16 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
     private FloatingActionsMenu FAB_new_one;
     private FloatingActionButton fab_text, fab_paint, fab_record;
     private BottomNavigationView navigation;
+
+    private Thread thread;
+
+    //接受返回消息的线程
+    @SuppressLint("HandlerLeak")
+    private Handler handler = new Handler() {
+        public void handleMessage(Message message) {
+            refreshRecyclerView();
+        }
+    };
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -133,7 +145,7 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
         win.setAttributes(winParams);
     }
 
-    //    删除记录并刷新ListView
+    //    删除记录并刷新RecyclerView
     public void delete(final String idorfilename) {
 
         new AlertDialog.Builder(this).setTitle("确认要删除吗？")
@@ -143,7 +155,7 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         // 点击“确认”后的操作
-                        switch (page){
+                        switch (page) {
                             case 1:
 //                                删除自动保存的数据
                                 SQLiteDatabase db = sqliteHelper.getWritableDatabase();//打开数据库
@@ -153,8 +165,6 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
                                 } catch (Exception e) {
                                     Log.e("execSQL", "删除数据出错");
                                 }
-                                initView();
-                                initAdapter(1);
                                 break;
                             case 2:
                             case 3:
@@ -166,7 +176,6 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
                                 }
                                 break;
                         }
-                        initView();
                         initAdapter(page);
                     }
                 })
@@ -180,7 +189,7 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
 
     }
 
-    //    右键菜单
+    //    长按菜单
     private void showDeleteDia(final String idorfilename) {
         AlertDialog.Builder multiDia = new AlertDialog.Builder(Main_activity.this);
         multiDia.setTitle("选择操作");
@@ -218,10 +227,7 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
         }
     }
 
-
-    /**
-     * 初始化view
-     */
+    //    初始化View
     private void initView() {
 //        实例化控件
         recyclerView = findViewById(R.id.itemlist);
@@ -233,10 +239,6 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
 
         cacheThreadPool = Executors.newCachedThreadPool();
         initAdapter(page);
-
-
-//        mRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));//这里用线性宫格显示 类似于grid view
-//        mRecyclerView.setLayoutManager(new StaggeredGridLayoutManager(2, OrientationHelper.VERTICAL));//这里用线性宫格显示 类似于瀑布流
 
         //        点击监听
         FAB_new_one.setOnClickListener(this);
@@ -252,22 +254,23 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
 
         @Override
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-            switch (item.getItemId()) {
-                case R.id.navigation_text:
-                    //初始化文本适配器
-                    initAdapter(1);
-
-                    return true;
-                case R.id.navigation_paint:
-                    //初始化涂鸦适配器
-                    initAdapter(2);
-                    return true;
-                case R.id.navigation_record:
-                    //初始化录音适配器
-                    initAdapter(3);
-                    return true;
+            if (item.getItemId() == R.id.navigation_text || item.getItemId() == R.id.navigation_paint || item.getItemId() == R.id.navigation_record) {
+                switch (item.getItemId()) {
+                    case R.id.navigation_text:
+                        page = 1;
+                        break;
+                    case R.id.navigation_paint:
+                        page = 2;
+                        break;
+                    case R.id.navigation_record:
+                        page = 3;
+                        break;
+                }
+                refreshRecyclerView();
+                return true;
+            } else {
+                return false;
             }
-            return false;
         }
     };
 
@@ -277,163 +280,188 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
         FAB_new_one.collapse();
         sqliteHelper = DbManager.getIntance(this);
         initView();
-        initAdapter(page);
     }
 
-    /**
-     * 初始化Adapter
-     */
-    private void initAdapter(int i) {
-        page = i;
-        switch (i) {
-            case 1:
+    //    更新数据并刷新RecyclerView
+    private void initAdapter(final int i) {
+        thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Log.i("----Thread----",Integer.toString(i));
+                Message message = new Message();
+                switch (i) {
+                    case 1:
 //                初始化文字适配器
-                listText = new ArrayList<>();
-                //查询数据
-                SQLiteDatabase db = sqliteHelper.getWritableDatabase();
-                Cursor cursor = null;
-                String sql = "select * from " + Constant.TABLE_NAME + " order by " + Constant.TIME + " desc;";
-                cursor = DbManager.selectDataBySql(db, sql, null);
-                if (cursor != null) {
-                    while (cursor.moveToNext()) {
-                        Text_Entity text_entity = new Text_Entity();
-                        text_entity.setId(cursor.getString(cursor.getColumnIndex("id")));
-                        text_entity.setTime(cursor.getString(cursor.getColumnIndex("time")));
-                        text_entity.setSubstance(cursor.getString(cursor.getColumnIndex("substance")));
-                        listText.add(text_entity);
-                    }
-                }
-                db.close();//关闭数据库
-                textAdapter = new Text_Adapter(this, listText);
-                recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
-                textAdapter.setOnItemClickListener(new Text_Adapter.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(View view, int position) {
-                        Intent intent = new Intent(Main_activity.this, NewOne_activity.class);
-                        intent.putExtra("id", listText.get(position).getId());//将被点击的item id传递到新活动
-                        startActivity(intent);
-                    }
-                });
-                textAdapter.setOnItemLongClickListener(new Text_Adapter.OnItemLongClickListener() {
-                    @Override
-                    public void onItemLongClick(View view, int position) {
-                        page=1;
-                        showDeleteDia(listText.get(position).getId());
-                    }
-                });
-                recyclerView.setAdapter(textAdapter);
-                break;
-            case 2:
-                //初始化图片适配器
-                listPaint = new ArrayList<>();
-                getImage(listPaint);
-                paintAdapter = new Paint_Adapter(this, listPaint);
-
-                recyclerView.setLayoutManager(new GridLayoutManager(this, 3));
-
-                paintAdapter.setOnItemClickListener(new Paint_Adapter.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(View view, int position) {
-                        Intent intent = new Intent(Main_activity.this, Painter_activity.class);
-                        intent.putExtra("fileName", listPaint.get(position).getFilename());//将被点击的item文件名传递到新活动
-                        startActivity(intent);
-                    }
-                });
-                paintAdapter.setOnItemLongClickListener(new Paint_Adapter.OnItemLongClickListener() {
-                    @Override
-                    public void onItemLongClick(View view, int position) {
-                        page=2;
-                        showDeleteDia(listPaint.get(position).getFilename());
-                    }
-                });
-                recyclerView.setAdapter(paintAdapter);
-                break;
-            case 3:
-                //初始化录音适配器
-                listRecord = new ArrayList<>();
-                getRecord(listRecord);
-                recordAdapter = new Record_Adapter(this, listRecord);
-                recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
-                viewHolderList = recordAdapter.getViewHolderList();
-                recordAdapter.setOnItemClickListener(new Record_Adapter.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(View view, int position) {
-                        final Record_Adapter.ViewHolder viewHolder = viewHolderList.get(position);
-                        if (player != null && isPlaying && position != playingItem) {
-                            stop();
-                            player = null;
-                            loopThread.interrupt();
-                            running = false;
-                        }
-                        for (int i = 0; i < viewHolderList.size(); i++) {
-                            TextView image = viewHolderList.get(i).image;
-                            TextView time = viewHolderList.get(i).time;
-                            image.setBackgroundResource(R.drawable.btn_play);
-                            time.setBackgroundResource(R.drawable.bg_player_normal);
-                        }
-                        if (player == null) {
-                            if (Build.VERSION.SDK_INT < 23) {
-                                player = MediaPlayer.create(Main_activity.this, Uri.parse("/mnt/" + listRecord.get(position).getFilename()));
-                            } else {
-                                player = new MediaPlayer();
-                                String uri = "/mnt/" + listRecord.get(position).getFilename();
-                                File file = new File(uri);
-                                try {
-                                    FileInputStream fis = new FileInputStream(file);
-                                    player.setDataSource(fis.getFD());
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
+                        listText = new ArrayList<>();
+//                查询数据
+                        SQLiteDatabase db = null;
+                        db = sqliteHelper.getWritableDatabase();
+                        Cursor cursor = null;
+                        String sql = "select * from " + Constant.TABLE_NAME + " order by " + Constant.TIME + " desc;";
+                        cursor = DbManager.selectDataBySql(db, sql, null);
+                        if (cursor != null) {
+                            while (cursor.moveToNext()) {
+                                Text_Entity text_entity = new Text_Entity();
+                                text_entity.setId(cursor.getString(cursor.getColumnIndex("id")));
+                                text_entity.setTime(cursor.getString(cursor.getColumnIndex("time")));
+                                text_entity.setSubstance(cursor.getString(cursor.getColumnIndex("substance")));
+                                listText.add(text_entity);
                             }
-                            player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                                @Override
-                                public void onCompletion(MediaPlayer mp) {
-                                    isPlaying = false;
+                        }
+                        db.close();//关闭数据库
+                        textAdapter = new Text_Adapter(Main_activity.this, listText);
+                        textAdapter.setOnItemClickListener(new Text_Adapter.OnItemClickListener() {
+                            @Override
+                            public void onItemClick(View view, int position) {
+                                Intent intent = new Intent(Main_activity.this, NewOne_activity.class);
+                                intent.putExtra("id", listText.get(position).getId());//将被点击的item id传递到新活动
+                                startActivity(intent);
+                            }
+                        });
+                        textAdapter.setOnItemLongClickListener(new Text_Adapter.OnItemLongClickListener() {
+                            @Override
+                            public void onItemLongClick(View view, int position) {
+                                page = 1;
+                                showDeleteDia(listText.get(position).getId());
+                            }
+                        });
+                        break;
+                    case 2:
+                        //初始化图片适配器
+                        listPaint = new ArrayList<>();
+                        getImage(listPaint);
+                        paintAdapter = new Paint_Adapter(Main_activity.this, listPaint);
+                        paintAdapter.setOnItemClickListener(new Paint_Adapter.OnItemClickListener() {
+                            @Override
+                            public void onItemClick(View view, int position) {
+                                Intent intent = new Intent(Main_activity.this, Painter_activity.class);
+                                intent.putExtra("fileName", listPaint.get(position).getFilename());//将被点击的item文件名传递到新活动
+                                startActivity(intent);
+                            }
+                        });
+                        paintAdapter.setOnItemLongClickListener(new Paint_Adapter.OnItemLongClickListener() {
+                            @Override
+                            public void onItemLongClick(View view, int position) {
+                                page = 2;
+                                showDeleteDia(listPaint.get(position).getFilename());
+                            }
+                        });
+                        break;
+                    case 3:
+                        //初始化录音适配器
+                        listRecord = new ArrayList<>();
+                        getRecord(listRecord);
+                        recordAdapter = new Record_Adapter(Main_activity.this, listRecord);
+                        viewHolderList = recordAdapter.getViewHolderList();
+                        recordAdapter.setOnItemLongClickListener(new Record_Adapter.OnItemLongClickListener() {
+                            @Override
+                            public void onItemLongClick(View view, int position) {
+                                page = 3;
+                                showDeleteDia(listRecord.get(position).getFilename());
+                            }
+                        });
+                        recordAdapter.setOnItemClickListener(new Record_Adapter.OnItemClickListener() {
+                            @Override
+                            public void onItemClick(View view, int position) {
+                                final Record_Adapter.ViewHolder viewHolder = viewHolderList.get(position);
+                                if (player != null && isPlaying && position != playingItem) {
+                                    stop();
                                     player = null;
                                     loopThread.interrupt();
                                     running = false;
+                                }
+                                for (int i = 0; i < viewHolderList.size(); i++) {
+                                    TextView image = viewHolderList.get(i).image;
+                                    TextView time = viewHolderList.get(i).time;
+                                    image.setBackgroundResource(R.drawable.btn_play);
+                                    time.setBackgroundResource(R.drawable.bg_player_normal);
+                                }
+                                if (player == null) {
+                                    if (Build.VERSION.SDK_INT < 23) {
+                                        player = MediaPlayer.create(Main_activity.this, Uri.parse("/mnt/" + listRecord.get(position).getFilename()));
+                                    } else {
+                                        player = new MediaPlayer();
+                                        String uri = "/mnt/" + listRecord.get(position).getFilename();
+                                        File file = new File(uri);
+                                        try {
+                                            FileInputStream fis = new FileInputStream(file);
+                                            player.setDataSource(fis.getFD());
+                                        } catch (IOException e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+                                    player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                                        @Override
+                                        public void onCompletion(MediaPlayer mp) {
+                                            isPlaying = false;
+                                            player = null;
+                                            loopThread.interrupt();
+                                            running = false;
+                                            viewHolder.image.setBackgroundResource(R.drawable.btn_play);
+                                            viewHolder.time.setBackgroundResource(R.drawable.bg_player_normal);
+                                            playingItem = -1;
+                                        }
+                                    });
+                                }
+                                if (isPlaying) {
+                                    stop();
+                                    player = null;
+                                    loopThread.interrupt();
+                                    running = false;
+                                    playingItem = -1;
                                     viewHolder.image.setBackgroundResource(R.drawable.btn_play);
                                     viewHolder.time.setBackgroundResource(R.drawable.bg_player_normal);
-                                    playingItem = -1;
+                                } else {
+                                    start();
+                                    if (isPlaying) {
+                                        viewHolder.image.setBackgroundResource(R.drawable.btn_pause);
+                                        running = true;
+                                        if (!runed || playingItem == -1) {
+                                            updateSeekBar();
+                                        }
+                                        playingItem = position;
+                                    } else {
+                                        player = null;
+                                    }
                                 }
-                            });
-                        }
-                        if (isPlaying) {
-                            stop();
-                            player = null;
-                            loopThread.interrupt();
-                            running = false;
-                            playingItem = -1;
-                            viewHolder.image.setBackgroundResource(R.drawable.btn_play);
-                            viewHolder.time.setBackgroundResource(R.drawable.bg_player_normal);
-                        } else {
-                            start();
-                            if (isPlaying) {
-                                viewHolder.image.setBackgroundResource(R.drawable.btn_pause);
-                                running = true;
-                                if (!runed || playingItem == -1) {
-                                    updateSeekBar();
-                                }
-                                playingItem = position;
-                            } else {
-                                player = null;
                             }
-                        }
-                    }
-                });
+                        });
+                        break;
+                }
+                handler.sendMessage(message);//使用Message传递消息给线程
+            }
+        });
+        thread.start();
+    }
 
-                recordAdapter.setOnItemLongClickListener(new Record_Adapter.OnItemLongClickListener() {
-                    @Override
-                    public void onItemLongClick(View view, int position) {
-                        page=3;
-                        showDeleteDia(listRecord.get(position).getFilename());
-                    }
-                });
-                recyclerView.setAdapter(recordAdapter);
+    //    刷新RecyclerView，不更新数据
+    private void refreshRecyclerView() {
+        switch (page) {
+            case 1:
+                if (null == listText) {
+                    initAdapter(page);
+                } else {
+                    recyclerView.setLayoutManager(new LinearLayoutManager(Main_activity.this, LinearLayoutManager.VERTICAL, false));
+                    recyclerView.setAdapter(textAdapter);
+                }
+                break;
+            case 2:
+                if (null == listPaint) {
+                    initAdapter(page);
+                } else {
+                    recyclerView.setLayoutManager(new GridLayoutManager(Main_activity.this, 3));
+                    recyclerView.setAdapter(paintAdapter);
+                }
+                break;
+            case 3:
+                if (null == listRecord) {
+                    initAdapter(page);
+                } else {
+                    recyclerView.setLayoutManager(new LinearLayoutManager(Main_activity.this, LinearLayoutManager.VERTICAL, false));
+                    recyclerView.setAdapter(recordAdapter);
+                }
                 break;
         }
-
-
     }
 
     //同步seekbar与进度条时间
@@ -552,7 +580,6 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
         super.onRestart();
         sqliteHelper = DbManager.getIntance(this);
         initView();
-        initAdapter(page);
     }
 
     private void getImage(List<Paint_Entity> list) {

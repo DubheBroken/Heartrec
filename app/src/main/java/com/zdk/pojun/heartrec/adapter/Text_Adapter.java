@@ -1,6 +1,7 @@
 package com.zdk.pojun.heartrec.adapter;
 
 import android.content.Context;
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -132,7 +133,7 @@ public class Text_Adapter extends RecyclerView.Adapter<Text_Adapter.ViewHolder> 
             substance = itemView.findViewById(R.id.text_item_substance);
             imgbtn_arrow = itemView.findViewById(R.id.text_item_imgbtn_arrow);
         }
-        LinearLayout layout;
+        ConstraintLayout layout;
         TextView time;//时间
         TextView substance;//内容
         TextView imgbtn_arrow;//箭头

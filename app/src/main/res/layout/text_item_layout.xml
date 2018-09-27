@@ -1,72 +1,74 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v7.widget.CardView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_height="wrap_content"
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
+    android:layout_height="wrap_content"
     android:orientation="vertical"
-    >
+    app:cardCornerRadius="3dp"
+    app:cardElevation="1dp"
+    app:cardPreventCornerOverlap="true"
+    app:cardUseCompatPadding="true">
 
-    <LinearLayout
+    <android.support.constraint.ConstraintLayout
         android:id="@+id/text_layout_item"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:orientation="horizontal"
-        android:layout_marginBottom="8dp"
-        android:layout_marginTop="8dp"
         android:layout_marginLeft="8dp"
+        android:layout_marginTop="8dp"
         android:layout_marginRight="8dp"
-        >
-        <LinearLayout
-            android:layout_marginLeft="4dp"
-            android:layout_gravity="center"
-            android:layout_weight="1"
-            android:layout_width="match_parent"
+        android:layout_marginBottom="8dp">
+
+
+        <TextView
+            android:id="@+id/text_item_substance"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            >
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="@string/substance"
+            android:textColor="@color/text_black"
+            android:textSize="13sp"
+            app:layout_constraintEnd_toStartOf="@+id/text_item_imgbtn_arrow"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-                <TextView
-                    android:layout_gravity="center_vertical"
-                    android:layout_marginTop="8dp"
-                    android:layout_marginBottom="4dp"
-                    android:id="@+id/text_item_substance"
-                    android:layout_height="wrap_content"
-                    android:layout_width="match_parent"
-                    android:textColor="@color/text_black"
-                    android:text="@string/substance"
-                    android:textSize="13sp"
-                    android:maxLines="1"
-                    android:ellipsize="end"
-                    />
+        <TextView
+            android:id="@+id/text_item_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:text="@string/time"
+            android:textColor="@color/meantext"
+            android:textSize="10sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/text_item_substance" />
 
-                <TextView
-                    android:layout_marginBottom="8dp"
-                    android:layout_gravity="center_vertical"
-                    android:id="@+id/text_item_time"
-                    android:layout_height="wrap_content"
-                    android:layout_width="match_parent"
-                    android:text="@string/time"
-                    android:textColor="@color/meantext"
-                    android:textSize="10sp"/>
-
-        </LinearLayout>
 
         <TextView
             android:id="@+id/text_item_imgbtn_arrow"
-            android:contentDescription="展开"
-            android:layout_gravity="center_horizontal|top"
-            android:layout_marginTop="12dp"
-            android:layout_weight="0"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="8dp"
             android:background="@drawable/img_arrow"
-            />
-    </LinearLayout>
+            android:contentDescription="展开"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/text_item_substance"
+            app:layout_constraintTop_toTopOf="parent" />
+    </android.support.constraint.ConstraintLayout>
 
     <!--分割线-->
-    <View
-        android:layout_width="wrap_content"
-        android:layout_height="2dp"
-        android:background="@drawable/line_bottom" />
+    <!--<View-->
+    <!--android:layout_width="wrap_content"-->
+    <!--android:layout_height="2dp"-->
+    <!--android:background="@drawable/line_bottom"-->
+    <!--app:layout_constraintEnd_toEndOf="parent"-->
+    <!--app:layout_constraintStart_toStartOf="parent" />-->
 
 </android.support.v7.widget.CardView>
