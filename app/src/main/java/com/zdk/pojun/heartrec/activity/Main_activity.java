@@ -34,8 +34,6 @@ import com.zdk.pojun.heartrec.AppData;
 import com.zdk.pojun.heartrec.R;
 import com.zdk.pojun.heartrec.adapter.Paint_Adapter;
 import com.zdk.pojun.heartrec.adapter.Record_Adapter;
-import com.zdk.pojun.heartrec.custom.RecyclerViewSpacesItemDecoration;
-import com.zdk.pojun.heartrec.custom.SpaceItemDecoration;
 import com.zdk.pojun.heartrec.entity.Paint_Entity;
 import com.zdk.pojun.heartrec.entity.Record_Entity;
 import com.zdk.pojun.heartrec.utils.Constant;
@@ -50,7 +48,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -104,8 +101,7 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
         initView();
 
 
-//        沉浸式状态栏
-        // 4.4及以上版本开启
+//        沉浸式状态栏 4.4及以上版本开启
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
             setTranslucentStatus(true);
             SystemBarTintManager tintManager = new SystemBarTintManager(this);
@@ -138,7 +134,7 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
     }
 
     //    删除记录并刷新ListView
-    public void deleteText(final String id) {
+    public void delete(final String idorfilename) {
 
         new AlertDialog.Builder(this).setTitle("确认要删除吗？")
                 .setIcon(android.R.drawable.ic_dialog_info)
@@ -147,16 +143,31 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         // 点击“确认”后的操作
-//                            删除自动保存的数据
-                        SQLiteDatabase db = sqliteHelper.getWritableDatabase();//打开数据库
-                        try {
-                            String sql = "delete from " + Constant.TABLE_NAME + " where " + Constant.ID + "=" + id + ";";
-                            DbManager.execSQL(db, sql);
-                        } catch (Exception e) {
-                            Log.e("execSQL", "删除数据出错");
+                        switch (page){
+                            case 1:
+//                                删除自动保存的数据
+                                SQLiteDatabase db = sqliteHelper.getWritableDatabase();//打开数据库
+                                try {
+                                    String sql = "delete from " + Constant.TABLE_NAME + " where " + Constant.ID + "=" + idorfilename + ";";
+                                    DbManager.execSQL(db, sql);
+                                } catch (Exception e) {
+                                    Log.e("execSQL", "删除数据出错");
+                                }
+                                initView();
+                                initAdapter(1);
+                                break;
+                            case 2:
+                            case 3:
+                                File file = new File(idorfilename);
+                                try {
+                                    file.delete();
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                                break;
                         }
                         initView();
-                        initAdapter(1);
+                        initAdapter(page);
                     }
                 })
                 .setNegativeButton("取消", new DialogInterface.OnClickListener() {
@@ -169,65 +180,8 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
 
     }
 
-    //删除图片文件并刷新ListView
-    public void deleteImage(final String filename) {
-        new AlertDialog.Builder(this).setTitle("确认要删除吗？")
-                .setIcon(android.R.drawable.ic_dialog_info)
-                .setPositiveButton("确定", new DialogInterface.OnClickListener() {
-
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        // 点击“确认”后的操作
-                        File file = new File(filename);
-                        try {
-                            file.delete();
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                        initView();
-                        initAdapter(2);
-                        recyclerView.setAdapter(paintAdapter);
-                    }
-                })
-                .setNegativeButton("取消", new DialogInterface.OnClickListener() {
-
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        // 点击“返回”后的操作,这里不设置没有任何操作
-                    }
-                }).show();
-    }
-
-    //删除图片文件并刷新ListView
-    public void deleteRecord(final String filename) {
-        new AlertDialog.Builder(this).setTitle("确认要删除吗？")
-                .setIcon(android.R.drawable.ic_dialog_info)
-                .setPositiveButton("确定", new DialogInterface.OnClickListener() {
-
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        // 点击“确认”后的操作
-                        File file = new File(filename);
-                        try {
-                            file.delete();
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
-                        initView();
-                        initAdapter(3);
-                    }
-                })
-                .setNegativeButton("取消", new DialogInterface.OnClickListener() {
-
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        // 点击“返回”后的操作,这里不设置没有任何操作
-                    }
-                }).show();
-    }
-
     //    右键菜单
-    private void showDeleteTextDia(final String id) {
+    private void showDeleteDia(final String idorfilename) {
         AlertDialog.Builder multiDia = new AlertDialog.Builder(Main_activity.this);
         multiDia.setTitle("选择操作");
         multiDia.setPositiveButton("删除", new DialogInterface.OnClickListener() {
@@ -235,37 +189,7 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 // TODO Auto-generated method stub
-                deleteText(id);
-            }
-        });
-        multiDia.create().show();
-    }
-
-    //    右键菜单
-    private void showDeleteImageDia(final String filename) {
-        AlertDialog.Builder multiDia = new AlertDialog.Builder(Main_activity.this);
-        multiDia.setTitle("选择操作");
-        multiDia.setPositiveButton("删除", new DialogInterface.OnClickListener() {
-
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                // TODO Auto-generated method stub
-                deleteImage(filename);
-            }
-        });
-        multiDia.create().show();
-    }
-
-    //    右键菜单
-    private void showDeleteRecordDia(final String filename) {
-        AlertDialog.Builder multiDia = new AlertDialog.Builder(Main_activity.this);
-        multiDia.setTitle("选择操作");
-        multiDia.setPositiveButton("删除", new DialogInterface.OnClickListener() {
-
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                // TODO Auto-generated method stub
-                deleteRecord(filename);
+                delete(idorfilename);
             }
         });
         multiDia.create().show();
@@ -393,7 +317,8 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
                 textAdapter.setOnItemLongClickListener(new Text_Adapter.OnItemLongClickListener() {
                     @Override
                     public void onItemLongClick(View view, int position) {
-                        showDeleteTextDia(listText.get(position).getId());
+                        page=1;
+                        showDeleteDia(listText.get(position).getId());
                     }
                 });
                 recyclerView.setAdapter(textAdapter);
@@ -417,7 +342,8 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
                 paintAdapter.setOnItemLongClickListener(new Paint_Adapter.OnItemLongClickListener() {
                     @Override
                     public void onItemLongClick(View view, int position) {
-                        showDeleteImageDia(listPaint.get(position).getFilename());
+                        page=2;
+                        showDeleteDia(listPaint.get(position).getFilename());
                     }
                 });
                 recyclerView.setAdapter(paintAdapter);
@@ -499,7 +425,8 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
                 recordAdapter.setOnItemLongClickListener(new Record_Adapter.OnItemLongClickListener() {
                     @Override
                     public void onItemLongClick(View view, int position) {
-                        showDeleteRecordDia(listRecord.get(position).getFilename());
+                        page=3;
+                        showDeleteDia(listRecord.get(position).getFilename());
                     }
                 });
                 recyclerView.setAdapter(recordAdapter);
