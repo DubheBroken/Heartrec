@@ -166,16 +166,32 @@ public class NewOne_activity extends Activity implements OnClickListener {
             Cursor cursor = null;
             String sql = "select * from " + Constant.TABLE_NAME + " where " + Constant.ID + "=" + id + ";";
             cursor = DbManager.selectDataBySql(db, sql, null);
-            if (cursor != null) {
+            if (cursor != null && db.isOpen()) {
                 cursor.moveToNext();
                 Text_Entity text_entity = new Text_Entity();
                 text_entity.setId(cursor.getString(cursor.getColumnIndex("id")));
                 text_entity.setTime(cursor.getString(cursor.getColumnIndex("time")));
                 text_entity.setSubstance(cursor.getString(cursor.getColumnIndex("substance")));
 
-                db.close();//关闭数据库
+                sqliteHelper.removeOperation();
+                while (sqliteHelper.getOperation() > 0) {
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                while (sqliteHelper.getOperation() > 0) {
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+                //关闭数据库
+                db.close();
                 if (text_entity.getSubstance().equals(substance)) {//没有改变内容
-                    finish();//直接关闭
+                    finish();//直接关闭界面
                 } else {
                     showDialog();//询问是否保存
                 }
@@ -252,7 +268,16 @@ public class NewOne_activity extends Activity implements OnClickListener {
                 } catch (Exception e) {
                 }
             }
-            db.close();//关闭数据库
+            sqliteHelper.removeOperation();
+            while (sqliteHelper.getOperation() > 0) {
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            //关闭数据库
+            db.close();
         }
     }
 
@@ -287,13 +312,22 @@ public class NewOne_activity extends Activity implements OnClickListener {
         SQLiteDatabase db = sqliteHelper.getWritableDatabase();
         String sql = "select * from " + Constant.TABLE_NAME + " where " + Constant.ID + "=" + id + ";";
         Cursor cursor = DbManager.selectDataBySql(db, sql, null);
-        if (cursor != null) {
+        if (cursor != null && db.isOpen()) {
 //                为控件赋值
             if (cursor.moveToFirst()) {
                 editText_substance.setText(cursor.getString(cursor.getColumnIndex("substance")));
             }
         }
-        db.close();//关闭数据库
+        sqliteHelper.removeOperation();
+        while (sqliteHelper.getOperation() > 0) {
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+        //关闭数据库
+        db.close();
     }
 
 }

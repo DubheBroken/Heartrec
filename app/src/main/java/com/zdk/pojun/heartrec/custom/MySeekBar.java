@@ -12,7 +12,6 @@ public class MySeekBar extends android.support.v7.widget.AppCompatSeekBar {
 
     public MySeekBar(Context context) {
         super(context);
-        // TODO Auto-generated constructor stub
     }
 
     public MySeekBar(Context context, AttributeSet attrs) {
@@ -27,7 +26,6 @@ public class MySeekBar extends android.support.v7.widget.AppCompatSeekBar {
      */
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        // TODO Auto-generated method stub
         //原来是要将TouchEvent传递下去的,我们不让它传递下去就行了
         //return super.onTouchEvent(event);
 

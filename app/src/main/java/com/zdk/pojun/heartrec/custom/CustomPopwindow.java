@@ -23,7 +23,6 @@ public class CustomPopwindow extends PopupWindow {
     }
 
     private void initView(final Activity context,View.OnClickListener itemsOnClick) {
-        // TODO Auto-generated method stub
         LayoutInflater mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         mView = mInflater.inflate(R.layout.popwindow_new_one,null);
         Button btn_text = (Button) mView.findViewById(R.id.btn_text);
@@ -48,7 +47,6 @@ public class CustomPopwindow extends PopupWindow {
 
             @Override
             public void onDismiss() {
-                // TODO Auto-generated method stub
                 backgroundAlpha(context, 1f);
             }
         });

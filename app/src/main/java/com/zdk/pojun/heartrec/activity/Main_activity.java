@@ -9,6 +9,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -89,11 +90,18 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
 
     private Thread thread;
 
+    //RecyclerView容器
+    LinearLayoutManager linearLayoutManager = new LinearLayoutManager(Main_activity.this, LinearLayoutManager.VERTICAL, false);
+    GridLayoutManager gridLayoutManager = new GridLayoutManager(Main_activity.this, 3);
+
+
     //接受返回消息的线程
     @SuppressLint("HandlerLeak")
     private Handler handler = new Handler() {
         public void handleMessage(Message message) {
-            refreshRecyclerView();
+            if ((boolean) message.obj) {
+                refreshRecyclerView();
+            }
         }
     };
 
@@ -111,7 +119,9 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
 
         sqliteHelper = DbManager.getIntance(this);
         initView();
-
+        initAdapter(1, true);
+        initAdapter(2, false);
+        initAdapter(3, false);
 
 //        沉浸式状态栏 4.4及以上版本开启
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.KITKAT) {
@@ -127,7 +137,6 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
                 tintManager.setTintColor(getColor(R.color.colorAccent));
             }
         }
-
 
     }
 
@@ -176,7 +185,7 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
                                 }
                                 break;
                         }
-                        initAdapter(page);
+                        initAdapter(page, true);
                     }
                 })
                 .setNegativeButton("取消", new DialogInterface.OnClickListener() {
@@ -197,7 +206,6 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
 
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                // TODO Auto-generated method stub
                 delete(idorfilename);
             }
         });
@@ -238,7 +246,6 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
         navigation = findViewById(R.id.navigation);
 
         cacheThreadPool = Executors.newCachedThreadPool();
-        initAdapter(page);
 
         //        点击监听
         FAB_new_one.setOnClickListener(this);
@@ -246,48 +253,46 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
         fab_paint.setOnClickListener(this);
         fab_record.setOnClickListener(this);
 
-        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
-    }
+        navigation.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
 
-    private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
-            = new BottomNavigationView.OnNavigationItemSelectedListener() {
-
-        @Override
-        public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-            if (item.getItemId() == R.id.navigation_text || item.getItemId() == R.id.navigation_paint || item.getItemId() == R.id.navigation_record) {
-                switch (item.getItemId()) {
-                    case R.id.navigation_text:
-                        page = 1;
-                        break;
-                    case R.id.navigation_paint:
-                        page = 2;
-                        break;
-                    case R.id.navigation_record:
-                        page = 3;
-                        break;
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                if (item.getItemId() == R.id.navigation_text || item.getItemId() == R.id.navigation_paint || item.getItemId() == R.id.navigation_record) {
+                    switch (item.getItemId()) {
+                        case R.id.navigation_text:
+                            page = 1;
+                            break;
+                        case R.id.navigation_paint:
+                            page = 2;
+                            break;
+                        case R.id.navigation_record:
+                            page = 3;
+                            break;
+                    }
+                    refreshRecyclerView();
+                    return true;
+                } else {
+                    return false;
                 }
-                refreshRecyclerView();
-                return true;
-            } else {
-                return false;
             }
-        }
-    };
+        });
+    }
 
     @Override
     protected void onResume() {
         super.onResume();
         FAB_new_one.collapse();
         sqliteHelper = DbManager.getIntance(this);
-        initView();
+//        initView();
+        initAdapter(page, true);
     }
 
-    //    更新数据并刷新RecyclerView
-    private void initAdapter(final int i) {
+    //    更新数据
+    private void initAdapter(final int i, final boolean toRefresh) {
         thread = new Thread(new Runnable() {
             @Override
             public void run() {
-                Log.i("----Thread----",Integer.toString(i));
+                Log.i("----Thread----", Integer.toString(i));
                 Message message = new Message();
                 switch (i) {
                     case 1:
@@ -299,7 +304,7 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
                         Cursor cursor = null;
                         String sql = "select * from " + Constant.TABLE_NAME + " order by " + Constant.TIME + " desc;";
                         cursor = DbManager.selectDataBySql(db, sql, null);
-                        if (cursor != null) {
+                        if (cursor != null && db.isOpen()) {
                             while (cursor.moveToNext()) {
                                 Text_Entity text_entity = new Text_Entity();
                                 text_entity.setId(cursor.getString(cursor.getColumnIndex("id")));
@@ -308,8 +313,17 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
                                 listText.add(text_entity);
                             }
                         }
-                        db.close();//关闭数据库
-                        textAdapter = new Text_Adapter(Main_activity.this, listText);
+                        sqliteHelper.removeOperation();
+                        while (sqliteHelper.getOperation() > 0) {
+                            try {
+                                Thread.sleep(500);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        //关闭数据库
+                        db.close();
+                        textAdapter = new Text_Adapter(listText);
                         textAdapter.setOnItemClickListener(new Text_Adapter.OnItemClickListener() {
                             @Override
                             public void onItemClick(View view, int position) {
@@ -428,37 +442,47 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
                         });
                         break;
                 }
+                message.obj = toRefresh;
                 handler.sendMessage(message);//使用Message传递消息给线程
             }
         });
         thread.start();
     }
 
-    //    刷新RecyclerView，不更新数据
+    //    刷新RecyclerView
     private void refreshRecyclerView() {
         switch (page) {
             case 1:
-                if (null == listText) {
-                    initAdapter(page);
-                } else {
-                    recyclerView.setLayoutManager(new LinearLayoutManager(Main_activity.this, LinearLayoutManager.VERTICAL, false));
-                    recyclerView.setAdapter(textAdapter);
+                if (null != listText) {
+                    if (recyclerView.getAdapter() != textAdapter) {
+                        recyclerView.setLayoutManager(linearLayoutManager);
+                        recyclerView.setAdapter(textAdapter);
+                    }
+//                    else {
+//                        textAdapter.notify();
+//                    }
                 }
                 break;
             case 2:
-                if (null == listPaint) {
-                    initAdapter(page);
-                } else {
-                    recyclerView.setLayoutManager(new GridLayoutManager(Main_activity.this, 3));
-                    recyclerView.setAdapter(paintAdapter);
+                if (null != listPaint) {
+                    if (recyclerView.getAdapter() != paintAdapter) {
+                        recyclerView.setLayoutManager(gridLayoutManager);
+                        recyclerView.setAdapter(paintAdapter);
+                    }
+//                        else {
+//                        paintAdapter.notify();
+//                    }
                 }
                 break;
             case 3:
-                if (null == listRecord) {
-                    initAdapter(page);
-                } else {
-                    recyclerView.setLayoutManager(new LinearLayoutManager(Main_activity.this, LinearLayoutManager.VERTICAL, false));
-                    recyclerView.setAdapter(recordAdapter);
+                if (null != listRecord) {
+                    if (recyclerView.getAdapter() != recordAdapter) {
+                        recyclerView.setLayoutManager(linearLayoutManager);
+                        recyclerView.setAdapter(recordAdapter);
+                    }
+//                        else {
+//                        paintAdapter.notify();
+//                    }
                 }
                 break;
         }
@@ -580,6 +604,7 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
         super.onRestart();
         sqliteHelper = DbManager.getIntance(this);
         initView();
+        initAdapter(page, true);
     }
 
     private void getImage(List<Paint_Entity> list) {
