@@ -21,17 +21,21 @@
                     android:id="@+id/paint_item_image"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical" />
+                    android:layout_gravity="center_vertical"
+                    android:scaleType="centerInside"
+                    android:adjustViewBounds="true"
+                    />
 
                 <TextView
                     android:id="@+id/paint_item_time"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
+                    android:layout_gravity="center"
                     android:text="@string/time"
                     android:textAlignment="center"
                     android:textAllCaps="false"
                     android:textColor="@color/black"
+                    android:background="@color/time_back"
                     android:textSize="@dimen/textsize_paintsize" />
 
         </LinearLayout>

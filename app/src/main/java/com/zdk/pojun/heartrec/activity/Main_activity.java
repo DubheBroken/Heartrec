@@ -92,7 +92,7 @@ public class Main_activity extends FragmentActivity implements OnClickListener {
 
     //RecyclerView容器
     LinearLayoutManager linearLayoutManager = new LinearLayoutManager(Main_activity.this, LinearLayoutManager.VERTICAL, false);
-    GridLayoutManager gridLayoutManager = new GridLayoutManager(Main_activity.this, 3);
+    GridLayoutManager gridLayoutManager = new GridLayoutManager(Main_activity.this, 2);
 
 
     //接受返回消息的线程

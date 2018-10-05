@@ -3,6 +3,7 @@ package com.zdk.pojun.heartrec.adapter;
 import android.content.Context;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,10 +11,14 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.zdk.pojun.heartrec.R;
 import com.zdk.pojun.heartrec.activity.Main_activity;
+import com.zdk.pojun.heartrec.activity.Painter_activity;
 import com.zdk.pojun.heartrec.entity.Paint_Entity;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -46,8 +51,15 @@ public class Paint_Adapter extends RecyclerView.Adapter<Paint_Adapter.ViewHolder
 
         //给控件赋值
         holder.time.setText(time);
-        holder.image.setImageURI(Uri.parse((list.get(position).getFilename())));
-
+//        int width = (holder.image.getContext().getResources().getDisplayMetrics().widthPixels)/2;
+//        int height = width * 2;
+//        holder.image.setLayoutParams(new LinearLayout.LayoutParams(width , height));
+//        holder.image.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+        Glide.with(context)
+                .load(new File((list.get(position).getFilename())))
+//                .apply(new RequestOptions().override(width,height))
+                .into(holder.image);
+//        Log.i("----paint adapter----",Uri.parse((list.get(position).getFilename())).toString());
         final ViewHolder finalHolder = holder;
         final LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) finalHolder.image.getLayoutParams();
 

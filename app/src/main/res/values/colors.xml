@@ -20,5 +20,6 @@
     <color name="purple">#7b00ff</color>
     <color name="pink">#ff00e5</color>
     <color name="black_semi_transparent">#7d000000</color>
+    <color name="time_back">#23000000</color>
 
 </resources>
